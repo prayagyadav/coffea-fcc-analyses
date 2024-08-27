@@ -11,7 +11,7 @@
 |               | **Generation** : Spring2021 |
 |               | **Samples** : `p8_ee_ZH_ecm240`, `p8_ee_ZZ_ecm240`, `p8_ee_WW_ecm240` |
 
-[Learn some physics behind this short analysis](https://www.prayagyadav.me)
+[Learn some physics behind this short analysis](./ZH_Recoil_Example_Physics.md)
 
 
 ## Prerequisite setup
