@@ -3,12 +3,13 @@ import  collections, argparse, hist, copy, glob, os, re
 from matplotlib.ticker import MultipleLocator, AutoMinorLocator
 from coffea.util import load
 from pandas.core.indexes.base import Level
-from processor_mHrecoil import plot_props
-from runner_mHrecoil import ecm
+from config import *
 
 ##################################
 # Definition of useful functions #
 ##################################
+
+plot_props = pd.DataFrame(plots)
 
 def get_subdict(dicts, key):
     '''
@@ -138,7 +139,7 @@ def cuts_table(name, title, labels, formats, path):
         print(filename, " saved at ", path)
     plt.close()
 
-def plots(input_dict, req_hists, req_plots, selections, stack, log, formats, path, plotprops):
+def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, formats, path, plotprops):
     '''
     Batch plot processor: Creates Yield, Cutflow and Kinematic plots
     '''
@@ -370,32 +371,6 @@ parser.add_argument(
 inputs = parser.parse_args()
 
 
-##################################
-# Choose the required plots here #
-##################################
-selections = ['sel0','sel1']
-stack = [True, False]
-log = [True, False]
-formats = ['png','pdf']
-req_plots = ['Zm', 'Zm_zoom', 'Recoilm', 'Recoilm_zoom', 'Recoilm_zoom1']
-req_hists = {
-    "ZH":{"type":'Signal',"datasets":['p8_ee_ZH_ecm240'],"color":'r'},
-    "ZZ":{"type":'Background',"datasets":['p8_ee_ZZ_ecm240'],"color":'g'},
-    "WW":{"type":'Background',"datasets":['p8_ee_WW_ecm240'],"color":'b'}
-}
-cross_sections = {#in pb-1 # Taken as is from FCC events catalogue at https://fcc-physics-events.web.cern.ch/FCCee/spring2021/Delphesevents_IDEA.php
-    'p8_ee_WW_ecm240': 16.4385,
-    'p8_ee_ZZ_ecm240': 1.35899,
-    'p8_ee_ZH_ecm240': 0.201868
-}
-plot_path = 'outputs/FCCee/higgs/mH-recoil/mumu/plots/'
-intLumi        = 5.0e+06 #in pb-1
-ana_tex        = 'e^{+}e^{-} \\rightarrow ZH \\rightarrow \\mu^{+}\\mu^{-} + X'
-delphesVersion = '3.4.2'
-energy         = ecm #in GeV
-collider       = 'FCC-ee'
-
-
 #########################
 # Load the coffea files #
 #########################
@@ -446,4 +421,4 @@ print("Plotting...")
 if not os.path.exists(plot_path):
     os.makedirs(plot_path)
 
-plots(input, req_hists, req_plots, selections, stack, log, formats, plot_path,plot_props)
+generate_plots(input, req_hists, req_plots, selections, stack, log, formats, plot_path,plot_props)

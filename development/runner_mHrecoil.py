@@ -1,17 +1,4 @@
-# Define the requirements
-
-process = {
-    'collider':'FCCee',
-    'campaign':'spring2021',
-    'detector':'IDEA',
-    'samples':['p8_ee_ZZ_ecm240','p8_ee_WW_ecm240','p8_ee_ZH_ecm240']
-}
-fraction = {
-    'p8_ee_ZZ_ecm240':0.005,
-    'p8_ee_WW_ecm240':0.5,
-    'p8_ee_ZH_ecm240':0.2
-}
-ecm = 240.0 # #\sqrt(s) in GeV
+from config import *
 
 if __name__=="__main__":
     from coffea import util
@@ -21,7 +8,6 @@ if __name__=="__main__":
     import yaml
     import os
     import subprocess
-    from processor_mHrecoil import mHrecoil
     from coffea.dataset_tools import apply_to_fileset,max_chunks,preprocess
     from coffea.analysis_tools import Cutflow
     import dask
@@ -86,7 +72,8 @@ if __name__=="__main__":
         Loads the yaml data for filesets
         '''
         onlinesystem_path = '/cvmfs/fcc.cern.ch'
-        localsystem_path = './../../../../../filesets/'
+        # localsystem_path = './../../../../../filesets/'
+        localsystem_path = '../filesets/'
         path = '/'.join(
             [
              'FCCDicts',
@@ -103,7 +90,7 @@ if __name__=="__main__":
             filesystem_path = localsystem_path
         yaml_dict = {}
         for sample in process['samples']:
-            full_path = '/'.join([filesystem_path,path,sample,'merge.yaml'])
+            full_path = '/'.join([filesystem_path, path, sample, 'merge.yaml'])
             try :
                 with open(full_path) as f:
                     dict = yaml.safe_load(f)
@@ -218,15 +205,15 @@ if __name__=="__main__":
 from coffea import util
 from coffea.nanoevents import BaseSchema
 import os
-from processor_mHrecoil import mHrecoil
 from coffea.dataset_tools import apply_to_fileset,max_chunks
 import dask
+from {processor_path} import {processor_name}
 
 dataset_runnable = {dataset_runnable}
 maxchunks = {maxchunks}
 
 to_compute = apply_to_fileset(
-            mHrecoil(ecm={ecm}),
+            {processor_name}(*{processor_args},**{processor_kwargs}),
             max_chunks(dataset_runnable, maxchunks),
             schemaclass=BaseSchema,
 )
@@ -311,7 +298,7 @@ queue 1'''
         for i in range(len(dataset_runnable)):
             print('Chunk : ',i)
             to_compute = apply_to_fileset(
-                        mHrecoil(ecm=ecm),
+                        processor,
                         max_chunks(dataset_runnable[i], inputs.maxchunks),
                         schemaclass=BaseSchema,
             )
@@ -359,7 +346,7 @@ queue 1'''
             create_submit_file(
                 filename=f'submit_{i}.sh',
                 executable=f'job_{i}.sh',
-                input=f'{pwd}/{batch_dir}/job_{i}.py,{pwd}/processor_mHrecoil.py',
+                input=f'{pwd}/{batch_dir}/job_{i}.py,{pwd}/{processor_path}.py',
                 output=f'singularity.log.job_{i},{output_filename}'
             )
             subprocess.run(['chmod','u+x',f'submit_{i}.sh'])
