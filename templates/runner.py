@@ -27,14 +27,14 @@ if __name__=="__main__":
         "--executor",
         choices=["condor", "dask"],
         help="Enter where to run the file : dask(local) or condor (Note: Only dask(local) works at the moment)",
-        default="dask",
+        default=executor,
         type=str
     )
     parser.add_argument(
         "-o",
         "--outfile",
         help="Enter the base-name of the coffea file to output with .coffea extension. By default: 'mHrecoil_mumu'",
-        default="mHrecoil_mumu",
+        default=output_filename,
         type=str
     )
     parser.add_argument(
