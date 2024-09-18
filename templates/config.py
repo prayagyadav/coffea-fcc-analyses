@@ -20,6 +20,8 @@ fraction = {
 ecm = 240.0 # #\sqrt(s) in GeV
 local_yaml_dict = "../filesets/"
 output_path = "outputs/FCCee/Example/"
+output_filename = "Example"
+executor = "dask" # 'dask' is local and 'condor' is batch
 
 
 ###################
