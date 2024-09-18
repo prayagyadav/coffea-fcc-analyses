@@ -18,6 +18,8 @@ fraction = {
 }
 ecm = 240.0 # #\sqrt(s) in GeV
 local_yaml_dict = "../../filesets/"
+output_path = "outputs/FCCee/Example/"
+
 
 ###################
 # Plot properties #
@@ -45,7 +47,7 @@ selections = ['sel0','sel1']
 stack = [True, False]
 log = [True, False]
 formats = ['png','pdf']
-req_plots = ['Rec_E',]
+req_plots = ['Recon_E',]
 req_hists = {
     "ZZ":{"type":'Background',"datasets":['p8_ee_ZZ_ecm240'],"color":'g'},
     "ZH":{"type":'Signal',"datasets":['p8_ee_ZH_ecm240'],"color":'r'},
@@ -54,7 +56,8 @@ cross_sections = {#in pb-1 # Taken as is from FCC events catalogue at https://fc
     'p8_ee_ZZ_ecm240': 1.35899,
     'p8_ee_ZH_ecm240': 0.201868
 }
-plot_path      = 'outputs/FCCee/example'
+input_path     = output_path
+plot_path      = 'outputs/FCCee/Example/'
 intLumi        = 5.0e+06 #in pb-1
 ana_tex        = 'e^{+}e^{-} \\rightarrow Example \\rightarrow Process'
 delphesVersion = '3.4.2'

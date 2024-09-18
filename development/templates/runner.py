@@ -41,7 +41,7 @@ if __name__=="__main__":
         "-p",
         "--path",
         help="Enter the path to save the output files. By default 'outputs/FCCee/higgs/mH-recoil/mumu/')",
-        default="outputs/FCCee/higgs/mH-recoil/mumu/",
+        default=output_path,
         type=str
     )
     parser.add_argument(

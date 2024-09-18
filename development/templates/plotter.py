@@ -365,7 +365,7 @@ parser.add_argument(
     "-i",
     "--input",
     help="Enter the input directory where the coffea files are saved",
-    default="outputs/FCCee/higgs/mH-recoil/mumu",
+    default=input_path,
     type=str
 )
 inputs = parser.parse_args()
