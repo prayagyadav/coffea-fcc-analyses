@@ -1,7 +1,8 @@
 # =========================================================================================================================
 # Configuration to run the analysis
 # =========================================================================================================================
-
+# Here the fields are filled with a simple example
+# Fill them with your desired values and delete this line if needed.
 
 #################
 # Run Variables #
@@ -17,7 +18,7 @@ fraction = {
     'p8_ee_ZZ_ecm240':0.001,
 }
 ecm = 240.0 # #\sqrt(s) in GeV
-local_yaml_dict = "../../filesets/"
+local_yaml_dict = "../filesets/"
 output_path = "outputs/FCCee/Example/"
 
 

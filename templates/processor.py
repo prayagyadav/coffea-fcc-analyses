@@ -113,7 +113,7 @@ class example_processor(processor.ProcessorABC):
         names = plot_props.columns.to_list()
         vars_sel0 = [get(sel0_events,'ReconstructedParticles','energy')]
         vars_sel1 = [get(sel1_events,'ReconstructedParticles','energy')]
-        print(vars_sel0[0].compute())
+
         Output = {
             'histograms': {
                 'sel0':{name:get_1Dhist(name,var,flatten=True) for name,var in zip(names,vars_sel0)},
