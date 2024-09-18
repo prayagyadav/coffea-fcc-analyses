@@ -376,7 +376,7 @@ inputs = parser.parse_args()
 #########################
 #Input configuration
 input_path = inputs.input+"/"
-base_filename = "mHrecoil_mumu.coffea"
+base_filename = output_filename+".coffea"
 print(f'Current configuration:\n\tinput_path:\t{input_path}\n\tbase_filename:\t{base_filename}\n')
 print("Loading coffea files...")
 

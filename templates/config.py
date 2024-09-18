@@ -19,9 +19,9 @@ fraction = {
 }
 ecm = 240.0 # #\sqrt(s) in GeV
 local_yaml_dict = "../filesets/"
-output_path = "outputs/FCCee/Example/"
+output_path = "outputs/FCCee/Example"
 output_filename = "Example"
-executor = "dask" # 'dask' is local and 'condor' is batch
+executor = "condor" # 'dask' is local and 'condor' is batch
 
 
 ###################
@@ -36,8 +36,8 @@ plots = {
 # Processor #
 #############
 from processor import example_processor
-processor_path = "processor_mHrecoil"
-processor_name = "mHrecoil"
+processor_path = "processor"
+processor_name = "example_processor"
 processor_args = []
 processor_kwargs = {}
 processor = example_processor(*processor_args, **processor_kwargs)
