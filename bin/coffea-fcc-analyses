@@ -1,3 +1,12 @@
 #!/usr/bin/bash
 
 echo "COFFEA FCC ANALYSES"
+
+echo "Running: ${1}"
+
+if [ "${1}"="init" ]; then
+	echo "Creating project from template ..."
+	mkdir -p ${2}
+	cp -r "${COFFEA_FCC_ANALYSES_ROOT_DIRECTORY}/"templates/* ${2}
+	echo "Created ${2}"
+fi
