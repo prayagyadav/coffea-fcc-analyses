@@ -1,0 +1,9 @@
+processing:
+  jobid: '159112833'
+  nevents: 100000
+  out: /eos/experiment/fcc/ee/generation/DelphesEvents/winter2023/IDEA/wzp6_ee_mumuH_Hbb_ecm240/events_159112833.root
+  process: wzp6_ee_mumuH_Hbb_ecm240
+  size: 934054730
+  status: DONE
+  sumofweights: 100000.0
+  user: lportale
