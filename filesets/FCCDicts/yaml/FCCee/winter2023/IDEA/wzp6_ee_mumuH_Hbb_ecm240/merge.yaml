@@ -1,0 +1,16 @@
+merge:
+  nbad: 0
+  ndone: 3
+  nevents: 300000
+  outdir: /eos/experiment/fcc/ee/generation/DelphesEvents/winter2023/IDEA/wzp6_ee_mumuH_Hbb_ecm240/
+  outfiles:
+  - - events_159112833.root
+    - 100000
+  - - events_160156697.root
+    - 100000
+  - - events_008395310.root
+    - 100000
+  outfilesbad: []
+  process: wzp6_ee_mumuH_Hbb_ecm240
+  size: 2801978219
+  sumofweights: 300000.0
