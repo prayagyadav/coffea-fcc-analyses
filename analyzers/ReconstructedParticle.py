@@ -1,5 +1,6 @@
 import dask_awkward as dak
 import awkward as ak
+import numpy as np
 
 
 def resonanceBuilder(lepton, resonance):
@@ -36,3 +37,20 @@ def recoilBuilder(vec, ecm):
     '''
     Recoil = ak.zip({"px":0.0-vec.px,"py":0.0-vec.py,"pz":0.0-vec.pz,"E":ecm-vec.E},with_name="Momentum4D")
     return Recoil
+
+
+def remove(array, idx):
+    '''
+    Returns all the particles except the indices defined in idx.index.
+    Eg. remove(events.ReconstructedParticle, events.Muonidx0) returns the events.ReconstructedParticle array with all the muons removed
+    '''
+    index = idx.index
+    all_index = ak.local_index(array,axis=1)
+
+    i,a = ak.unzip(ak.cartesian([index[:,np.newaxis] ,all_index], nested=True))
+    c = a == i
+    d = ak.firsts(c)
+    s = ak.sum(d, axis=2)
+    kl = s == 1
+    
+    return array[~kl]
