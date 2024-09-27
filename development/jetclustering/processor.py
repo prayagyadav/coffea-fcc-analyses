@@ -12,8 +12,9 @@ vector.register_awkward()
 from config import plots
 import sys
 ROOT_DIR="/home/prayag/coffeafcc/coffea-fcc-analyses/"
-sys.path.append(ROOT_DIR+"analyzers")
-import ReconstructedParticle
+sys.path.append(ROOT_DIR)
+from analyzers import ReconstructedParticle as ReconstructedParticleUtil
+from analyzers import Jet as JetUtil
 
 plot_props = pd.DataFrame(plots)
 
@@ -43,8 +44,8 @@ class jetclustering(processor.ProcessorABC):
     def process(self,events):
 
         Muons = events.ReconstructedParticles.match_collection(events.Muonidx0)
-        Z = ReconstructedParticle.resonanceBuilder(Muons, 91.0)
-        Recoil = ReconstructedParticle.recoilBuilder(Z, 240.0)
+        Z = ReconstructedParticleUtil.resonanceBuilder(Muons, 91.0)
+        Recoil = ReconstructedParticleUtil.recoilBuilder(Z, 240.0)
         z_cuts = PackedSelection()
         jet_cuts = PackedSelection()
 
@@ -80,7 +81,7 @@ class jetclustering(processor.ProcessorABC):
         Good_Z = Z[z_cuts.all()]
         Good_Recoil = Recoil[z_cuts.all()]
 
-        rps_no_mu = ReconstructedParticle.remove(events.ReconstructedParticles, events.Muonidx0)
+        rps_no_mu = ReconstructedParticleUtil.remove(events.ReconstructedParticles, events.Muonidx0)
         pseudo_jets = ak.zip(
             {
             'px':rps_no_mu.px,
@@ -95,8 +96,8 @@ class jetclustering(processor.ProcessorABC):
         # [Done] arg_exclusive = 2
         # [Not Sure] arg_cut = 2 i.e., N jets for m_exclusive
         # [Not Sure] arg_sorted = 0 i.e., p_T ordering
-        # [Not Sure] arg_recombination = 10 i.e., E0_scheme : Special for FCCAnalyses
-        jetdef.set_recombination_scheme(0) # E scheme
+        # [Done] arg_recombination = 10 i.e., E0_scheme : Special for FCCAnalyses
+        jetdef.set_python_recombiner(JetUtil.E0_scheme)
         #jetdef.description()
         cluster = fastjet.ClusterSequence(pseudo_jets, jetdef)
         jet_constituents = cluster.constituents()
