@@ -17,4 +17,4 @@ class E0_scheme:
         psum.py = psum.py()*E0scale
         psum.pz = psum.pz()*E0scale
 
-        return psum*E0scale
+        return psum
