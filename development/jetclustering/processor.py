@@ -80,7 +80,7 @@ class jetclustering(processor.ProcessorABC):
         Good_Z = Z[z_cuts.all()]
         Good_Recoil = Recoil[z_cuts.all()]
 
-        rps_no_mu = events.ReconstructedParticles[sel_n_e_0_Muons]
+        rps_no_mu = ReconstructedParticle.remove(events.ReconstructedParticles, events.Muonidx0)
         pseudo_jets = ak.zip(
             {
             'px':rps_no_mu.px,
