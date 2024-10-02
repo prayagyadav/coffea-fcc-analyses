@@ -118,7 +118,8 @@ class jetclustering(processor.ProcessorABC):
                 'sel': {'Onecut':sel_ocl[0],'Cutflow':sel_ocl[1],'Labels':sel_ocl[2]},
             }
         }
-
+        
+        jetdef.delete_recombiner_when_unused()
         del jet_constituents
         del jets
         del dijets
