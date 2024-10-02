@@ -11,10 +11,12 @@ import vector
 vector.register_awkward()
 from config import plots
 import sys
-ROOT_DIR="/home/prayag/coffeafcc/coffea-fcc-analyses/"
-sys.path.append(ROOT_DIR)
-from analyzers import ReconstructedParticle as ReconstructedParticleUtil
-from analyzers import Jet as JetUtil
+import os
+local_dir = os.environ['LOCAL_DIR']
+sys.path.append(local_dir)
+import scripts
+from scripts.analyzers import ReconstructedParticle as ReconstructedParticleUtil
+from scripts.analyzers import Jet as JetUtil
 
 plot_props = pd.DataFrame(plots)
 

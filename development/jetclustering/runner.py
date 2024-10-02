@@ -2,15 +2,15 @@ from config import *
 
 if __name__=="__main__":
     import sys
-    ROOT_DIR="/home/prayag/coffeafcc/coffea-fcc-analyses/"
-    sys.path.append(ROOT_DIR)
-    from coffea import util
+    import os
+    local_dir = os.environ['LOCAL_DIR']
+    sys.path.append(local_dir)
     import argparse
     from coffea.nanoevents import BaseSchema
     try:
         from coffea.nanoevents import FCC
     except:
-        from schema.fcc import FCC
+        from scripts.schema.fcc import FCC
     import numpy as np
     import yaml
     import os
