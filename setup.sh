@@ -1,3 +1,7 @@
-export COFFEA_FCC_ANALYSES_ROOT_DIRECTORY="$(pwd)"
-export PYTHONPATH="$(pwd)/python:analyzers"
-alias coffea-fcc-analyses="$(pwd)/bin/coffea-fcc-analyses"
+if [ "${0}" != "${BASH_SOURCE}" ]; then
+	# Determinig the location of this setup script
+	export LOCAL_DIR=$(cd $(dirname "${BASH_SOURCE}") && pwd)
+
+	export PYTHONPATH="${LOCAL_DIR}/scripts:${PYTHONPATH}"
+	alias coffea-fcc-analyses="${LOCAL_DIR}/bin/coffea-fcc-analyses"
+fi
