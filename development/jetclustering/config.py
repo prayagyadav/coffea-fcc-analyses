@@ -49,7 +49,7 @@ processor = jetclustering(*processor_args, **processor_kwargs)
 ######################
 # Plotting Variables #
 ######################
-selections = ['z_sel','jet_sel']
+selections = ['sel']
 stack = [False]
 log = [True, False]
 formats = ['png','pdf']
