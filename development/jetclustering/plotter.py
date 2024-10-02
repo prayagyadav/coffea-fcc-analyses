@@ -67,12 +67,12 @@ def get_xsec_scale(dataset, raw_events, Luminosity):
         raise ValueError('Raw events less than of equal to zero!')
     return round(float(sf),3)
 
-def yield_plot(name, title, keys, scaled, unscaled, formats, path):
+def yield_plot(name, title, keys, scaled, unscaled, formats, path, plot_width=8, plot_height=8):
     '''
     Create yield plots
     '''
 
-    fig, ax = plt.subplots(figsize=(8,8))
+    fig, ax = plt.subplots(figsize=(plot_width,plot_height))
     ax.text(0.25, 1.02, 'FCC Analyses: FCC-ee Simulation (Delphes)', fontsize=10, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
     ax.text(0.92, 1.02, '$\\sqrt{s} = '+str(energy)+' GeV$', fontsize=10, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
     ax.text(0.10, 0.95, collider, fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
@@ -243,7 +243,8 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
             scaled=hist_list_signal+hist_list,
             unscaled=unscaled_hist_list_signal+unscaled_hist_list,
             formats=formats,
-            path=plot_path_selection
+            path=plot_path_selection,
+            plot_width=12
         )
         print('---------------------------------------------------------------')
 
@@ -254,7 +255,9 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
         # Start plotting
         for hist_name in req_plots+['Cutflow']:
             hist = [hists[hist_name] for hists in hist_list]
+            n_bkgs = len(hist)
             hist_signal = [hists[hist_name] for hists in hist_list_signal]
+            n_sig = len(hist_signal)
             cutflow_mode=False
             if hist_name =='Cutflow':
                 cutflow_mode=True
@@ -284,7 +287,7 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
                         cutflow_mode=cutflow_mode
                     )
                     #Signal
-                    if stack_mode :
+                    if stack_mode and n_bkgs != 0:
                         sigl_hist = sum(hist_signal)+sum(hist) #Manual stacking because independent stacking is not supported in mplhep
                     else :
                         sigl_hist = hist_signal
@@ -299,6 +302,7 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
                         ax=ax
                     )
                     fig.legend(prop={"size":10},loc= (0.74,0.74) )
+
                     if log_mode :
                         log_mode_text = 'log'
                     else :
@@ -321,19 +325,20 @@ def makeplot(fig, ax, hist, name, title, label, xlabel, ylabel, bins, xmin, xmax
     '''
     Makes a single kinematic plot on an ax object
     '''
-    hep.histplot(
-        hist,
-        yerr=0,
-        histtype=histtype,
-        label=label,
-        color=color,
-        alpha=0.8,
-        stack=stack,
-        edgecolor='black',
-        linewidth=1,
-        sort='yield',
-        ax=ax
-    )
+    if len(hist) != 0 :
+        hep.histplot(
+            hist,
+            yerr=0,
+            histtype=histtype,
+            label=label,
+            color=color,
+            alpha=0.8,
+            stack=stack,
+            edgecolor='black',
+            linewidth=1,
+            sort='yield',
+            ax=ax
+        )
 
     ax.text(0.27, 1.02, 'FCC Analyses: FCC-ee Simulation (Delphes)', fontsize=9, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
     ax.text(0.92, 1.02, f'$\\sqrt{{s}} = {energy} GeV$', fontsize=9, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)

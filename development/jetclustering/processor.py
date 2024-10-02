@@ -46,40 +46,38 @@ class jetclustering(processor.ProcessorABC):
         Muons = events.ReconstructedParticles.match_collection(events.Muonidx0)
         Z = ReconstructedParticleUtil.resonanceBuilder(Muons, 91.0)
         Recoil = ReconstructedParticleUtil.recoilBuilder(Z, 240.0)
-        z_cuts = PackedSelection()
-        jet_cuts = PackedSelection()
+        cuts = PackedSelection()
 
         #Define Selections
         sel_p_gt_25_Muons = Muons.p > 25.0
-        
+
         sel_n_e_0_Muons = ak.num(Muons, axis=1) == 0
         sel_n_gte_2_Muons = ak.num(Muons, axis=1) >= 2
 
         sel_q_e_0_Z = Z.charge == 0
         sel_m_gt_70_Z = Z.m > 70.0
         sel_m_lt_100_Z = Z.m < 100.0
-        
+
         sel_p_gt_20_Z = Z.p > 20.0
         sel_p_lt_70_Z = Z.p < 70.0
-        
+
         sel_m_gt_120_Recoil = Recoil.m > 120.0
         sel_m_lt_140_Recoil = Recoil.m < 140.0
-        
+
         # Add the selections to the cuts Packed Selection
-        z_cuts.add("p_gt_25_Muons", ak.any(sel_p_gt_25_Muons, axis=1))
-        z_cuts.add("n_gte_2_Muons", sel_n_gte_2_Muons)
-        z_cuts.add("q_e_0_Z", sel_q_e_0_Z)
-        z_cuts.add("m_gt_70_Z", sel_m_gt_70_Z)
-        z_cuts.add("m_lt_100_Z", sel_m_lt_100_Z)
-        z_cuts.add("p_gt_20_Z", sel_p_gt_20_Z)
-        z_cuts.add("p_lt_70_Z", sel_p_lt_70_Z)
-        z_cuts.add("m_gt_120_Recoil", sel_m_gt_120_Recoil)
-        z_cuts.add("m_lt_140_Recoil", sel_m_lt_140_Recoil)
-        jet_cuts.add("n_e_0_Muons", sel_n_e_0_Muons)
+        cuts.add("p_gt_25_Muons", ak.any(sel_p_gt_25_Muons, axis=1))
+        cuts.add("n_gte_2_Muons", sel_n_gte_2_Muons)
+        cuts.add("q_e_0_Z", sel_q_e_0_Z)
+        cuts.add("m_gt_70_Z", sel_m_gt_70_Z)
+        cuts.add("m_lt_100_Z", sel_m_lt_100_Z)
+        cuts.add("p_gt_20_Z", sel_p_gt_20_Z)
+        cuts.add("p_lt_70_Z", sel_p_lt_70_Z)
+        cuts.add("m_gt_120_Recoil", sel_m_gt_120_Recoil)
+        cuts.add("m_lt_140_Recoil", sel_m_lt_140_Recoil)
 
         # Calculate the final variables
-        Good_Z = Z[z_cuts.all()]
-        Good_Recoil = Recoil[z_cuts.all()]
+        Good_Z = Z[cuts.all()]
+        Good_Recoil = Recoil[cuts.all()]
 
         rps_no_mu = ReconstructedParticleUtil.remove(events.ReconstructedParticles, events.Muonidx0)
         pseudo_jets = ak.zip(
@@ -92,7 +90,7 @@ class jetclustering(processor.ProcessorABC):
             with_name="Momentum4D"
         )
         jetdef = fastjet.JetDefinition0Param(fastjet.ee_kt_algorithm)
-        # Requirements: 
+        # Requirements:
         # [Done] arg_exclusive = 2
         # [Not Sure] arg_cut = 2 i.e., N jets for m_exclusive
         # [Not Sure] arg_sorted = 0 i.e., p_T ordering
@@ -107,20 +105,15 @@ class jetclustering(processor.ProcessorABC):
         #Prepare output
         #Choose the required histograms and their assigned variables to fill
         names = plot_props.columns.to_list()
-        vars_z_sel = [dijets.m, Good_Recoil.m, Good_Z.p, Good_Z.m]
-        vars_jet_sel = vars_z_sel
-        z_sel_ocl = z_cuts.cutflow(*z_cuts.names).yieldhist()
-        jet_sel_ocl = jet_cuts.cutflow(*jet_cuts.names).yieldhist()
-        
+        vars_sel = [dijets.m, Good_Recoil.m, Good_Z.p, Good_Z.m, dijets.m]
+        sel_ocl = cuts.cutflow(*cuts.names).yieldhist()
 
         Output = {
             'histograms': {
-                'z_sel':{name:get_1Dhist(name,var,flatten=False) for name,var in zip(names,vars_z_sel)},
-                'jet_sel':{name:get_1Dhist(name,var,flatten=False) for name,var in zip(names,vars_jet_sel)}
+                'sel':{name:get_1Dhist(name,var,flatten=False) for name,var in zip(names,vars_sel)},
             },
             'cutflow': {
-                'z_sel': {'Onecut':z_sel_ocl[0],'Cutflow':z_sel_ocl[1],'Labels':z_sel_ocl[2]},
-                'jet_sel': {'Onecut':jet_sel_ocl[0],'Cutflow':jet_sel_ocl[1],'Labels':jet_sel_ocl[2]}
+                'sel': {'Onecut':sel_ocl[0],'Cutflow':sel_ocl[1],'Labels':sel_ocl[2]},
             }
         }
         return Output

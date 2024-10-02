@@ -29,9 +29,9 @@ schema_version = "latest"
 plots = {
     'dijet_m':{'name':'dijet_higgs_m','title':'Dijet Higgs Mass','xlabel':'Dijet mass [GeV]','ylabel':'Events','bins':80,'xmin':70,'xmax':150},
     #'pdgid':{'name':'jets_truth','title':'Jets Truth','xlabel':'Jet truth label PDGID','ylabel':'Events','bins':16,'xmin':-8,'xmax':8},
-    'recoil':{'name':'zmumu_recoil_m','title':'$Z\\Rightarrow \\mu^{\\plus} \\mu^{\\minus}$ Mass','xlabel':'Recoil [GeV]','ylabel':'Events','bins':200,'xmin':120,'xmax':140},
-    'p_ll':{'name':'zmumu_p','title':'$Z\\Rightarrow \\mu^{\\plus} \\mu^{\\minus}$ Momentum','xlabel':'p(\\mu^{\\plus}\\mu^{\\minus}) [GeV]','ylabel':'Events','bins':50,'xmin':20,'xmax':70},
-    'm_ll':{'name':'zmumu_m','title':'$Z\\Rightarrow \\mu^{\\plus} \\mu^{\\minus}$ Mass','xlabel':'m(\\mu^{\\plus}\\mu^{\\minus}) [GeV]','ylabel':'Events','bins':40,'xmin':70,'xmax':110},
+    'recoil':{'name':'zmumu_recoil_m','title':'$Z\\rightarrow \\mu^{\\plus} \\mu^{\\minus}$ Mass','xlabel':'Recoil [GeV]','ylabel':'Events','bins':200,'xmin':120,'xmax':140},
+    'p_ll':{'name':'zmumu_p','title':'$Z\\rightarrow \\mu^{\\plus} \\mu^{\\minus}$ Momentum','xlabel':'p(\\mu^{\\plus}\\mu^{\\minus}) [GeV]','ylabel':'Events','bins':50,'xmin':20,'xmax':70},
+    'm_ll':{'name':'zmumu_m','title':'$Z\\rightarrow \\mu^{\\plus} \\mu^{\\minus}$ Mass','xlabel':'m(\\mu^{\\plus}\\mu^{\\minus}) [GeV]','ylabel':'Events','bins':40,'xmin':70,'xmax':110},
 }
 
 
@@ -50,7 +50,7 @@ processor = jetclustering(*processor_args, **processor_kwargs)
 # Plotting Variables #
 ######################
 selections = ['z_sel','jet_sel']
-stack = [True, False]
+stack = [False]
 log = [True, False]
 formats = ['png','pdf']
 #req_plots = ['dijet_m', 'pdgid', 'recoil', 'p_ll', 'm_ll']
