@@ -66,6 +66,12 @@ if __name__=="__main__":
         type=int,
         default=1
         )
+    parser.add_argument(
+        "-cc",
+        "--cachedchunks",
+        help="Skip the chunks that are already computed",
+        action='store_true'
+        )
 
     inputs = parser.parse_args()
 
@@ -233,6 +239,7 @@ to_compute = apply_to_fileset(
 )
 computed = dask.compute(to_compute)
 (Output,) = computed
+                output_filename = output_file.strip('.coffea')+f'-chunk{i}'+'.coffea'
 
 print("Saving the output to : " , "{output_file}")
 util.save(output= Output, filename="{output_file}")
@@ -288,6 +295,7 @@ queue 1'''
     raw_yaml = load_yaml_fileinfo(process)
     myfileset = get_fileset(raw_yaml, fraction, redirector='root://eospublic.cern.ch/')
     fileset = break_into_many(input_fileset=myfileset,n=inputs.chunks)
+    
 
     print('Preparing fileset before run...')
 
@@ -309,20 +317,23 @@ queue 1'''
             os.makedirs(path)
         #Output = []
         print("Executing locally with dask ...")
+        computed_chunks = os.listdir(path)
         for i in range(len(dataset_runnable)):
             print('Chunk : ',i)
+            output_filename = output_file.strip('.coffea')+f'-chunk{i}'+'.coffea'
+            if output_filename in computed_chunks and inputs.cachedchunks:
+                print(output_filename, " is already computed.")
+                continue
             to_compute = apply_to_fileset(
                         processor,
                         max_chunks(dataset_runnable[i], inputs.maxchunks),
                         schemaclass=schema,
                         uproot_options={"filter_name": lambda x : "PARAMETERS" not in x}
             )
-            computed = dask.compute(to_compute)
+            computed = dask.compute(to_compute, num_workers=8)
             (Out,) = computed
             #Output.append(Out)
-            if inputs.chunks > 1:
-                output_filename = output_file.strip('.coffea')+f'-chunk{i}'+'.coffea'
-            else:
+            if inputs.chunks < 2:
                 output_filename = output_file
             print("Saving the output to : " , output_filename)
             util.save(output= Out, filename=path+output_filename)

@@ -119,10 +119,15 @@ class jetclustering(processor.ProcessorABC):
             }
         }
         
-        jetdef.delete_recombiner_when_unused()
         del jet_constituents
         del jets
         del dijets
+        del cluster
+        del jetdef
+        del rps_no_mu
+        del pseudo_jets
+        del Good_Z
+        del Good_Recoil
 
         return Output
 
