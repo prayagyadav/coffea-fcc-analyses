@@ -17,6 +17,7 @@ if __name__=="__main__":
     import subprocess
     from coffea.dataset_tools import apply_to_fileset,max_chunks,preprocess
     from coffea.analysis_tools import Cutflow
+    from coffea import util
     import dask
     import copy
     import time
@@ -306,7 +307,7 @@ queue 1'''
     if inputs.executor == "dask" :
         if not os.path.exists(path):
             os.makedirs(path)
-        Output = []
+        #Output = []
         print("Executing locally with dask ...")
         for i in range(len(dataset_runnable)):
             print('Chunk : ',i)
@@ -318,7 +319,7 @@ queue 1'''
             )
             computed = dask.compute(to_compute)
             (Out,) = computed
-            Output.append(Out)
+            #Output.append(Out)
             if inputs.chunks > 1:
                 output_filename = output_file.strip('.coffea')+f'-chunk{i}'+'.coffea'
             else:
@@ -326,6 +327,8 @@ queue 1'''
             print("Saving the output to : " , output_filename)
             util.save(output= Out, filename=path+output_filename)
             print(f"File {output_filename} saved at {path}")
+            del computed
+            del Out
         print("Execution completed.")
 
     #For condor execution

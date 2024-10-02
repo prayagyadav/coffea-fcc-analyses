@@ -118,6 +118,11 @@ class jetclustering(processor.ProcessorABC):
                 'sel': {'Onecut':sel_ocl[0],'Cutflow':sel_ocl[1],'Labels':sel_ocl[2]},
             }
         }
+
+        del jet_constituents
+        del jets
+        del dijets
+
         return Output
 
     def postprocess(self, accumulator):

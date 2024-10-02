@@ -484,7 +484,7 @@ class FCCSchema(BaseSchema):
     def behavior(cls):
         """Behaviors necessary to implement this schema"""
         from coffea.nanoevents.methods import base 
-        from methods import fcc
+        from scripts.schema.methods import fcc
 
         behavior = {}
         behavior.update(base.behavior)
