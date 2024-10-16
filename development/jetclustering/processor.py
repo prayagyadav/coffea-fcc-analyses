@@ -44,44 +44,33 @@ class jetclustering(processor.ProcessorABC):
         pass
 
     def process(self,events):
-
+        
+        # Object Selections
         Muons = events.ReconstructedParticles.match_collection(events.Muonidx0)
+        sel_muon_p_gt_25 = Muons.p > 25.0
+        Muons = Muons[sel_muon_p_gt_25]
         Z = ReconstructedParticleUtil.resonanceBuilder(Muons, 91.0)
         Recoil = ReconstructedParticleUtil.recoilBuilder(Z, 240.0)
+        
+        #Event Selections
         cuts = PackedSelection()
+        cuts.add("n_gte_2_Muons", ak.num(Muons, axis=1) >= 2 )
+        cuts.add("m_gt_70_Z", Z.m > 70.0 )
+        cuts.add("m_lt_100_Z", Z.m < 100.0 )
+        cuts.add("p_gt_20_Z", Z.p > 20.0 )
+        cuts.add("p_lt_70_Z", Z.p < 70.0 )
+        cuts.add("m_gt_120_Recoil", Recoil.m > 120.0 )
+        cuts.add("m_lt_140_Recoil", Recoil.m < 140.0 )
 
-        #Define Selections
-        sel_p_gt_25_Muons = Muons.p > 25.0
-
-        sel_n_e_0_Muons = ak.num(Muons, axis=1) == 0
-        sel_n_gte_2_Muons = ak.num(Muons, axis=1) >= 2
-
-        sel_q_e_0_Z = Z.charge == 0
-        sel_m_gt_70_Z = Z.m > 70.0
-        sel_m_lt_100_Z = Z.m < 100.0
-
-        sel_p_gt_20_Z = Z.p > 20.0
-        sel_p_lt_70_Z = Z.p < 70.0
-
-        sel_m_gt_120_Recoil = Recoil.m > 120.0
-        sel_m_lt_140_Recoil = Recoil.m < 140.0
-
-        # Add the selections to the cuts Packed Selection
-        cuts.add("p_gt_25_Muons", ak.any(sel_p_gt_25_Muons, axis=1))
-        cuts.add("n_gte_2_Muons", sel_n_gte_2_Muons)
-        cuts.add("q_e_0_Z", sel_q_e_0_Z)
-        cuts.add("m_gt_70_Z", sel_m_gt_70_Z)
-        cuts.add("m_lt_100_Z", sel_m_lt_100_Z)
-        cuts.add("p_gt_20_Z", sel_p_gt_20_Z)
-        cuts.add("p_lt_70_Z", sel_p_lt_70_Z)
-        cuts.add("m_gt_120_Recoil", sel_m_gt_120_Recoil)
-        cuts.add("m_lt_140_Recoil", sel_m_lt_140_Recoil)
-
-        # Calculate the final variables
+        # Apply the event selections
         Good_Z = Z[cuts.all()]
         Good_Recoil = Recoil[cuts.all()]
-
-        rps_no_mu = ReconstructedParticleUtil.remove(events.ReconstructedParticles, events.Muonidx0)
+        
+        # The remove function removes those matched indices provided as argument 2
+        # To remove muons with p greater than 25, we have to use that cut on indices
+        # before passing on to the remove function
+        low_pt_muon_indices = events.Muonidx0[sel_muon_p_gt_25]
+        rps_no_mu = ReconstructedParticleUtil.remove(events.ReconstructedParticles, low_pt_muon_indices)
         pseudo_jets = ak.zip(
             {
             'px':rps_no_mu.px,

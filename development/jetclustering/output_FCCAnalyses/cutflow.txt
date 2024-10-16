@@ -1,0 +1,6 @@
+Count 1:  300000        No Cut
+Count 2:  274288        muons_no >= 2
+Count 2:  264262        zmumu_m > 70 && zmumu_m < 100
+Count 3:  262282        zmumu_p > 20 && zmumu_p < 70
+Count 4:  247578        zmumu_recoil_m < 140 && zmumu_recoil_m > 120
+Jet Reconstruction happens after all these filters.
