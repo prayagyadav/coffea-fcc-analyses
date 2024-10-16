@@ -29,3 +29,8 @@
 	Transfer output files failure at execution point slot1_14@b9g11p8386.cern.ch while sending files to access point bigbird12. Details: reading from file /pool/condor/dir_2335324/jetclustering.coffea: (errno 2) No such file or directory
 	Code 12 Subcode 2
 ...
+009 (12660664.000.000) 10/03 15:30:26 Job was aborted.
+	Job removed by SYSTEM_PERIODIC_REMOVE due to wall time exceeded allowed max.
+
+	Job terminated by itself at 2024-10-02T13:29:13Z (using method 0: OF_ITS_OWN_ACCORD).
+...
