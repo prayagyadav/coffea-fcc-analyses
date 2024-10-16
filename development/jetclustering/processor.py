@@ -69,8 +69,9 @@ class jetclustering(processor.ProcessorABC):
         # The remove function removes those matched indices provided as argument 2
         # To remove muons with p greater than 25, we have to use that cut on indices
         # before passing on to the remove function
-        low_pt_muon_indices = events.Muonidx0[sel_muon_p_gt_25]
-        rps_no_mu = ReconstructedParticleUtil.remove(events.ReconstructedParticles, low_pt_muon_indices)
+        high_p_muon_indices = events.Muonidx0[sel_muon_p_gt_25]
+        rps_no_mu = ReconstructedParticleUtil.remove(events.ReconstructedParticles, high_p_muon_indices)
+        rps_no_mu = rps_no_mu[cuts.all()] #Apply all the event selections
         pseudo_jets = ak.zip(
             {
             'px':rps_no_mu.px,
