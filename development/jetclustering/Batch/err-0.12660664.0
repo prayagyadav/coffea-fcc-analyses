@@ -1,4 +1,0 @@
-  File "/pool/condor/dir_2335324/job_0.py", line 15
-    schemaclass=<class 'scripts.schema.fcc.FCCSchema'>,
-                ^
-SyntaxError: invalid syntax

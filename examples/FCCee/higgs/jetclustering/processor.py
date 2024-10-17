@@ -81,15 +81,10 @@ class jetclustering(processor.ProcessorABC):
             },
             with_name="Momentum4D"
         )
+        arg_sort_pt = ak.argsort(pseudo_jets.pt)
         jetdef = fastjet.JetDefinition0Param(fastjet.ee_kt_algorithm)
-        # Requirements:
-        # [Done] arg_exclusive = 2
-        # [Not Sure] arg_cut = 2 i.e., N jets for m_exclusive
-        # [Not Sure] arg_sorted = 0 i.e., p_T ordering
-        # [Done] arg_recombination = 10 i.e., E0_scheme : Special for FCCAnalyses
         jetdef.set_python_recombiner(JetUtil.E0_scheme)
-        #jetdef.description()
-        cluster = fastjet.ClusterSequence(pseudo_jets, jetdef)
+        cluster = fastjet.ClusterSequence(pseudo_jets[arg_sort_pt], jetdef)
         jet_constituents = cluster.constituents()
         jets = cluster.exclusive_jets(2)
         dijets = ak.sum(jets, axis=1)
