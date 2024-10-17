@@ -6,9 +6,17 @@ import dask_awkward as dak
 import hist.dask as hda
 from collections import namedtuple
 import hist
+import fastjet
 import vector
 vector.register_awkward()
 from config import plots
+import sys
+import os
+local_dir = os.environ['LOCAL_DIR']
+sys.path.append(local_dir)
+import scripts
+from scripts.analyzers import ReconstructedParticle as ReconstructedParticleUtil
+from scripts.analyzers import Jet as JetUtil
 
 plot_props = pd.DataFrame(plots)
 
@@ -24,59 +32,6 @@ def get_1Dhist(name, var, flatten=False):
     var = var[~dak.is_none(var, axis=0)] # Remove None values only
     return hda.Hist.new.Reg(props.bins, props.xmin, props.xmax).Double().fill(var)
 
-def get(events,collection,attribute,*cut):
-    '''
-    Get an attribute from a branch with or without a base cut.
-    '''
-    if len(cut) != 0:
-        return events[collection+'/'+collection+'.'+attribute][cut[0]]
-    return events[collection+'/'+collection+'.'+attribute]
-
-def get_all(events,Collection,*basecut):
-    '''
-    Collect all the attributes of a collection into a namedtuple named particle, with or without a base cut
-    '''
-    prefix = '/'.join([Collection]*2)+'.'
-    list_of_attr = [field.replace(prefix,'') for field in events.fields if field.startswith(prefix)]
-    replace_list = ['.','[',']']
-    valid_attr = list_of_attr
-    for rep in replace_list:
-        valid_attr = [field.replace(rep, '_') for field in valid_attr ]
-    part = namedtuple('particle', valid_attr)
-    return part(*[get(events,Collection,attr,*basecut) for attr in list_of_attr])
-
-def get_reco(Reconstr_branch, needed_particle, events):
-    '''
-    Match the Reconstructed collection to the desired particle collection.
-    '''
-    part = namedtuple('particle', list(Reconstr_branch._fields))
-    return part(*[getattr(Reconstr_branch,attr)[get(events,needed_particle,'index')] for attr in Reconstr_branch._fields])
-
-def Reso_builder(lepton, resonance):
-    '''
-    Builds Resonance candidates
-    Input:    lepton(var*[var*LorentzVector]),
-              resonance(float)
-    Output: Reso([var*LorentzVecctor]) best resonance candidate in each event (maximum one per event)
-    '''
-    #Create all the combinations
-    combs = dak.combinations(lepton,2)
-    # Get dileptons
-    lep1 , lep2 = dak.unzip(combs)
-    di_lep = lep1 + lep2 # This process drops any other field except 4 momentum fields
-
-    di_lep = ak.zip({"px":di_lep.px,"py":di_lep.py,"pz":di_lep.pz,"E":di_lep.E,"q":lep1.q + lep2.q,}, with_name="Momentum4D")
-
-    # Sort by closest mass to the resonance value
-    sort_mask = dak.argsort(abs(resonance-di_lep.mass), axis=1)
-    Reso = di_lep[sort_mask]
-
-    #Choose the best candidate
-    Reso = dak.fill_none(Reso,[],axis=0) #Transform the None values at axis 0 to [], so that they survive the next operation
-    Reso = dak.firsts(Reso) #Chooses the first elements and flattens out, [] gets converted to None
-
-    return Reso
-
 
 #################################
 #Begin the processor definition #
@@ -89,41 +44,81 @@ class jetclustering(processor.ProcessorABC):
         pass
 
     def process(self,events):
+        
+        # Object Selections
+        Muons = events.ReconstructedParticles.match_collection(events.Muonidx0)
+        sel_muon_p_gt_25 = Muons.p > 25.0
+        Muons = Muons[sel_muon_p_gt_25]
+        Z = ReconstructedParticleUtil.resonanceBuilder(Muons, 91.0)
+        Recoil = ReconstructedParticleUtil.recoilBuilder(Z, 240.0)
+        
+        #Event Selections
+        cuts = PackedSelection()
+        cuts.add("n_gte_2_Muons", ak.num(Muons, axis=1) >= 2 )
+        cuts.add("m_gt_70_Z", Z.m > 70.0 )
+        cuts.add("m_lt_100_Z", Z.m < 100.0 )
+        cuts.add("p_gt_20_Z", Z.p > 20.0 )
+        cuts.add("p_lt_70_Z", Z.p < 70.0 )
+        cuts.add("m_gt_120_Recoil", Recoil.m > 120.0 )
+        cuts.add("m_lt_140_Recoil", Recoil.m < 140.0 )
 
-        #Create a Packed Selection object to get a cutflow later
-        cut = PackedSelection()
-        cut.add('No cut', dak.ones_like(dak.num(get(events,'ReconstructedParticles','energy'),axis=1),dtype=bool))
-
-        # Selection 0 : No Cut (example)
-        sel0_ocl = cut.cutflow(*cut.names).yieldhist()
-        sel0_events = events
-
-        # Filter out any event with no reconstructed particles and generate Reconstructed Particle Attributes
-        #ak.mask preserves array length
-        at_least_one_recon = dak.num(get(events,'ReconstructedParticles','energy'), axis=1) > 0
-        good_events = dak.mask(events,at_least_one_recon)
-        cut.add('At least one Reco Particle', at_least_one_recon)
-
-        # Selection 1 : No Cut and At least one Reco Particle
-        sel1_ocl = cut.cutflow(*cut.names).yieldhist()
-        sel1_events = good_events
+        # Apply the event selections
+        Good_Z = Z[cuts.all()]
+        Good_Recoil = Recoil[cuts.all()]
+        
+        # The remove function removes those matched indices provided as argument 2
+        # To remove muons with p greater than 25, we have to use that cut on indices
+        # before passing on to the remove function
+        high_p_muon_indices = events.Muonidx0[sel_muon_p_gt_25]
+        rps_no_mu = ReconstructedParticleUtil.remove(events.ReconstructedParticles, high_p_muon_indices)
+        rps_no_mu = rps_no_mu[cuts.all()] #Apply all the event selections
+        pseudo_jets = ak.zip(
+            {
+            'px':rps_no_mu.px,
+            'py':rps_no_mu.py,
+            'pz':rps_no_mu.pz,
+            'E':rps_no_mu.E
+            },
+            with_name="Momentum4D"
+        )
+        jetdef = fastjet.JetDefinition0Param(fastjet.ee_kt_algorithm)
+        # Requirements:
+        # [Done] arg_exclusive = 2
+        # [Not Sure] arg_cut = 2 i.e., N jets for m_exclusive
+        # [Not Sure] arg_sorted = 0 i.e., p_T ordering
+        # [Done] arg_recombination = 10 i.e., E0_scheme : Special for FCCAnalyses
+        jetdef.set_python_recombiner(JetUtil.E0_scheme)
+        #jetdef.description()
+        cluster = fastjet.ClusterSequence(pseudo_jets, jetdef)
+        jet_constituents = cluster.constituents()
+        jets = cluster.exclusive_jets(2)
+        dijets = ak.sum(jets, axis=1)
 
         #Prepare output
         #Choose the required histograms and their assigned variables to fill
         names = plot_props.columns.to_list()
-        vars_sel0 = [get(sel0_events,'ReconstructedParticles','energy')]
-        vars_sel1 = [get(sel1_events,'ReconstructedParticles','energy')]
+        vars_sel = [dijets.m, Good_Recoil.m, Good_Z.p, Good_Z.m, dijets.m]
+        sel_ocl = cuts.cutflow(*cuts.names).yieldhist()
 
         Output = {
             'histograms': {
-                'sel0':{name:get_1Dhist(name,var,flatten=True) for name,var in zip(names,vars_sel0)},
-                'sel1':{name:get_1Dhist(name,var,flatten=True) for name,var in zip(names,vars_sel1)}
+                'sel':{name:get_1Dhist(name,var,flatten=False) for name,var in zip(names,vars_sel)},
             },
             'cutflow': {
-                'sel0': {'Onecut':sel0_ocl[0],'Cutflow':sel0_ocl[1],'Labels':sel0_ocl[2]},
-                'sel1': {'Onecut':sel1_ocl[0],'Cutflow':sel1_ocl[1],'Labels':sel1_ocl[2]}
+                'sel': {'Onecut':sel_ocl[0],'Cutflow':sel_ocl[1],'Labels':sel_ocl[2]},
             }
         }
+        
+        del jet_constituents
+        del jets
+        del dijets
+        del cluster
+        del jetdef
+        del rps_no_mu
+        del pseudo_jets
+        del Good_Z
+        del Good_Recoil
+
         return Output
 
     def postprocess(self, accumulator):
