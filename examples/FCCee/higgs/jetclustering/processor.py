@@ -4,6 +4,7 @@ import awkward as ak
 import pandas as pd
 import dask_awkward as dak
 import hist.dask as hda
+import numpy as np
 from collections import namedtuple
 import hist
 import fastjet
@@ -31,6 +32,53 @@ def get_1Dhist(name, var, flatten=False):
     if flatten : var = dak.ravel(var) # Removes None values and all the nesting
     var = var[~dak.is_none(var, axis=0)] # Remove None values only
     return hda.Hist.new.Reg(props.bins, props.xmin, props.xmax).Double().fill(var)
+
+def JetTruthFinder(jet_constituents, mc, findGluons = False):
+    """
+    Make sure that jet_constituents and mc, all have
+    the same number of events.
+
+    We have to return the PDGID of the 
+    best matched genParton to the jets (by inspecting its dr with the jet constituents)
+
+    """
+    if not findGluons: #only quarks
+        parton_cut = (abs(mc.PDG) <= 6)
+    else: #only quarks and gluons
+        parton_cut = (abs(mc.PDG) <= 6) | (abs(mc.PDG) == 21)
+    
+    genPartons = mc[parton_cut]
+    
+    jetcon_b, genParton_b = ak.unzip(ak.cartesian((jet_constituents[:,:,np.newaxis], genPartons[:,np.newaxis])))
+    all_dr = jetcon_b.deltaR(genParton_b)
+    sum_dr = ak.sum(all_dr, axis=3)
+    min_idx = ak.argmin(sum_dr, axis=2)
+
+    return genPartons[min_idx]
+
+def easier_JetTruthFinder(jets, mc, findGluons = False):
+    """
+    Make sure that jets and mc, all have
+    the same number of events.
+
+    We have to return the PDGID of the 
+    best matched genParton to the jets (by inspecting its dr with the jet constituents)
+
+    But maybe there is a better way? What if we just find
+    the dr between the resultant jets and the partons?
+    """
+    if not findGluons: #only quarks
+        parton_cut = (abs(mc.PDG) <= 6)
+    else: #only quarks and gluons
+        parton_cut = (abs(mc.PDG) <= 6) | (abs(mc.PDG) == 21)
+
+    genPartons = mc[parton_cut]
+
+    jet_b, genParton_b = ak.unzip(ak.cartesian((jets, genPartons[:,np.newaxis])))
+    all_dr = jet_b.deltaR(genParton_b)
+    index = ak.argmin(all_dr, axis=2)
+
+    return genPartons[index]
 
 
 #################################
@@ -85,14 +133,23 @@ class jetclustering(processor.ProcessorABC):
         jetdef = fastjet.JetDefinition0Param(fastjet.ee_kt_algorithm)
         jetdef.set_python_recombiner(JetUtil.E0_scheme)
         cluster = fastjet.ClusterSequence(pseudo_jets[arg_sort_pt], jetdef)
-        jet_constituents = cluster.constituents()
         jets = cluster.exclusive_jets(2)
+        jet_constituents = cluster.exclusive_jets_constituents(2)
         dijets = ak.sum(jets, axis=1)
+        quarks_matched_to_jets = JetTruthFinder(jet_constituents, events.Particle[cuts.all()])
+        pdgid = quarks_matched_to_jets.PDG
 
         #Prepare output
         #Choose the required histograms and their assigned variables to fill
         names = plot_props.columns.to_list()
-        vars_sel = [dijets.m, Good_Recoil.m, Good_Z.p, Good_Z.m, dijets.m]
+        vars_sel = [
+            dijets.m,
+            ak.ravel(pdgid),
+            Good_Recoil.m,
+            Good_Z.p,
+            Good_Z.m,
+            dijets.m
+        ]
         sel_ocl = cuts.cutflow(*cuts.names).yieldhist()
 
         Output = {

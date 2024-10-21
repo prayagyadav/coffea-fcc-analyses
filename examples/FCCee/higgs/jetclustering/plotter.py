@@ -284,7 +284,8 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
                         stack=True, #Always stack backgrounds
                         color=color_list,
                         histtype='fill',
-                        cutflow_mode=cutflow_mode
+                        cutflow_mode=cutflow_mode,
+                        xticks=8
                     )
                     #Signal
                     if stack_mode and n_bkgs != 0:
