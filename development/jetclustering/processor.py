@@ -33,9 +33,32 @@ def get_1Dhist(name, var, flatten=False):
     var = var[~dak.is_none(var, axis=0)] # Remove None values only
     return hda.Hist.new.Reg(props.bins, props.xmin, props.xmax).Double().fill(var)
 
-def easier_JetTruthFinder(jets, jet_constituents, mc, findGluons = False):
+def JetTruthFinder(jet_constituents, mc, findGluons = False):
     """
-    Make sure that jets, jet_constituents and mc, all have
+    Make sure that jet_constituents and mc, all have
+    the same number of events.
+
+    We have to return the PDGID of the 
+    best matched genParton to the jets (by inspecting its dr with the jet constituents)
+
+    """
+    if not findGluons: #only quarks
+        parton_cut = (abs(mc.PDG) <= 6)
+    else: #only quarks and gluons
+        parton_cut = (abs(mc.PDG) <= 6) | (abs(mc.PDG) == 21)
+    
+    genPartons = mc[parton_cut]
+    
+    jetcon_b, genParton_b = ak.unzip(ak.cartesian((jet_constituents[:,:,np.newaxis], genPartons[:,np.newaxis])))
+    all_dr = jetcon_b.deltaR(genParton_b)
+    sum_dr = ak.sum(all_dr, axis=3)
+    min_idx = ak.argmin(sum_dr, axis=2)
+
+    return genPartons[min_idx]
+
+def easier_JetTruthFinder(jets, mc, findGluons = False):
+    """
+    Make sure that jets and mc, all have
     the same number of events.
 
     We have to return the PDGID of the 
@@ -55,8 +78,7 @@ def easier_JetTruthFinder(jets, jet_constituents, mc, findGluons = False):
     all_dr = jet_b.deltaR(genParton_b)
     index = ak.argmin(all_dr, axis=2)
 
-    matched_parton = genPartons[index]
-    return matched_parton
+    return genPartons[index]
 
 
 #################################
@@ -114,7 +136,7 @@ class jetclustering(processor.ProcessorABC):
         jets = cluster.exclusive_jets(2)
         jet_constituents = cluster.exclusive_jets_constituents(2)
         dijets = ak.sum(jets, axis=1)
-        quarks_matched_to_jets = easier_JetTruthFinder(jets, jet_constituents, events.Particle[cuts.all()])
+        quarks_matched_to_jets = JetTruthFinder(jet_constituents, events.Particle[cuts.all()])
         pdgid = quarks_matched_to_jets.PDG
 
         #Prepare output
