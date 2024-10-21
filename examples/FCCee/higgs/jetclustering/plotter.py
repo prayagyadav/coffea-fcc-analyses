@@ -326,6 +326,7 @@ def makeplot(fig, ax, hist, name, title, label, xlabel, ylabel, bins, xmin, xmax
     '''
     Makes a single kinematic plot on an ax object
     '''
+    # plt.ylim(1,1000000)
     if len(hist) != 0 :
         hep.histplot(
             hist,
