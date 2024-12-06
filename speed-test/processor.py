@@ -37,7 +37,7 @@ def get_1Dhist(name, var, flatten=False):
 #################################
 #Begin the processor definition #
 #################################
-class jetclustering(processor.ProcessorABC):
+class speed_test(processor.ProcessorABC):
     '''
     Processor: Define actual calculations here
     '''
@@ -45,14 +45,14 @@ class jetclustering(processor.ProcessorABC):
         pass
 
     def process(self,events):
-        
+
         # Object Selections
         Muons = events.ReconstructedParticles.match_collection(events.Muonidx0)
         sel_muon_p_gt_25 = Muons.p > 25.0
         Muons = Muons[sel_muon_p_gt_25]
         Z = ReconstructedParticleUtil.resonanceBuilder(Muons, 91.0)
         Recoil = ReconstructedParticleUtil.recoilBuilder(Z, 240.0)
-        
+
         #Event Selections
         cuts = PackedSelection()
         cuts.add("n_gte_2_Muons", ak.num(Muons, axis=1) >= 2 )
@@ -66,7 +66,7 @@ class jetclustering(processor.ProcessorABC):
         # Apply the event selections
         Good_Z = Z[cuts.all()]
         Good_Recoil = Recoil[cuts.all()]
-        
+
         #Prepare output
         #Choose the required histograms and their assigned variables to fill
         names = plot_props.columns.to_list()
@@ -85,7 +85,7 @@ class jetclustering(processor.ProcessorABC):
                 'sel': {'Onecut':sel_ocl[0],'Cutflow':sel_ocl[1],'Labels':sel_ocl[2]},
             }
         }
-        
+
         return Output
 
     def postprocess(self, accumulator):
