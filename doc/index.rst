@@ -10,6 +10,6 @@ Welcome to COFFEA-FCC Analyses!
    :maxdepth: 2
    :caption: Contents:
 
-   setup.md
-   examples.md
+   setup
+   examples
    license
