@@ -1,4 +1,4 @@
-Set up
+Installation
 ======
 
 Dependencies:
