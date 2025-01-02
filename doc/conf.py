@@ -46,5 +46,8 @@ html_theme_options = {
     "navbar_start" : ["navbar-logo", "version-switcher"],
     "navbar_end": ["theme-switcher", "navbar-icon-links"],
     "footer_start": ["copyright", "sphinx-version", "funding"],
+    "switcher": {
+        "json_url": "doc/switcher.json",
+        "version_match": 0.1,
+    }
 }
-
