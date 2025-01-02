@@ -2,6 +2,11 @@
     {
         "name": "Latest",
         "version": "0.1",
+        "url": "https://coffea-fcc-analyses.readthedocs.io/en/latest/"
+    },
+    {
+        "name": "0.1",
+        "version": "0.1",
         "url": "https://coffea-fcc-analyses.readthedocs.io/en/0.1/"
     }
 ]
