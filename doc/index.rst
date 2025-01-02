@@ -12,8 +12,6 @@ COFFEA-FCC-Analyses is an analysis framework for the Future Circular Collider sa
 :link-type: doc
 :link: getting-started
 
-{fas}`running`
-
 Getting started 
 ^^^^^^^^^^^^^^^
 Get started with using COFFEA-FCC-Analyses.
