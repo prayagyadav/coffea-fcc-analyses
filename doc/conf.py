@@ -9,7 +9,6 @@
 project = 'COFFEA-FCC Analyses'
 copyright = 'Prayag Yadav'
 author = 'Prayag Yadav'
-release = '0.1'
 
 
 # -- General configuration ---------------------------------------------------
