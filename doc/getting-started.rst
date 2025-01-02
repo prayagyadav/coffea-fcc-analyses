@@ -1,5 +1,14 @@
-Installation
+Getting Started
 ======
+
+Installation
+------------
+
+Start with cloning the repository
+
+.. code:: bash
+
+   git clone https://github.com/prayagyadav/coffea-fcc-analyses.git
 
 Dependencies:
 -------------
