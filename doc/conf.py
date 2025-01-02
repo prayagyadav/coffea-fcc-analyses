@@ -32,6 +32,7 @@ html_css_files = [
     'css/custom.css',
 ]
 
+
 # -- Theme options ------------------------------------------------------------
 # https://sphinx-nefertiti.readthedocs.io/en/latest/quick-start.html#customize-the-theme
 html_theme_options = {
@@ -45,3 +46,5 @@ html_theme_options = {
   "FCCAnalyses|https://github.com/HEP-FCC/FCCAnalyses"
  ])
 }
+html_theme_options["navbar_start"] = ["navbar-logo", "version-switcher"]
+
