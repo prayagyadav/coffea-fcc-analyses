@@ -47,8 +47,8 @@ html_css_files = [
 html_theme_options = {
     "github_url": "https://github.com/prayagyadav/coffea-fcc-analyses",
     "navbar_start" : ["navbar-logo"],
-    "navbar_center": ["version-switcher"],
-    "navbar_end": ["theme-switcher", "navbar-icon-links"],
+    # "navbar_center": [],
+    "navbar_end": ["version-switcher","theme-switcher", "navbar-icon-links"],
     "footer_start": ["copyright", "sphinx-version", "funding"],
     "switcher": {
         "json_url": "doc/switcher.json",
