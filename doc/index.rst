@@ -8,6 +8,21 @@ COFFEA-FCC-Analyses!
 
 COFFEA-FCC-Analyses is an analysis framework for the Future Circular Collider samples, based on `COFFEA <https://coffea-hep.readthedocs.io/en/latest/>`_ . It provides simplified workflows to start an FCC analysis with minimal boiler plate code.
 
+::::
+
+::::{grid-item-card} 
+:link-type: doc
+:link: getting-started
+
+{fas}`running`
+
+Getting started 
+^^^^^^^^^^^^^^^
+Get started with using COFFEA-FCC-Analyses.
+   
+
+::::
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
