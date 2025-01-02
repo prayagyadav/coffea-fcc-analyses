@@ -48,10 +48,10 @@ html_theme_options = {
     "github_url": "https://github.com/prayagyadav/coffea-fcc-analyses",
     "navbar_start" : ["navbar-logo"],
     # "navbar_center": [],
-    "navbar_end": ["version-switcher","theme-switcher", "navbar-icon-links"],
+    "navbar_end": ["version-switcher", "theme-switcher", "navbar-icon-links"],
     "footer_start": ["copyright", "sphinx-version", "funding"],
     "switcher": {
-        "json_url": "https://coffea-fcc-analyses.readthedocs.io/en/latest/_static/switcher.json",
+        "json_url": "https://coffea-fcc-analyses.readthedocs.io/en/latest/switcher.json",
         "version_match": "0.1",
     }
 }
