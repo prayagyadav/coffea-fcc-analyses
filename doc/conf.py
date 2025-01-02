@@ -34,6 +34,7 @@ html_context = {
 
 # html_theme = 'sphinx_rtd_theme'
 html_theme = "pydata_sphinx_theme"
+html_title = "COFFEA-FCC-Analyses"
 
 html_static_path = ['_static']
 html_css_files = [
