@@ -48,6 +48,6 @@ html_theme_options = {
     "footer_start": ["copyright", "sphinx-version", "funding"],
     "switcher": {
         "json_url": "doc/switcher.json",
-        "version_match": 0.1,
+        "version_match": "0.1",
     }
 }
