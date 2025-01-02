@@ -12,6 +12,9 @@ COFFEA-FCC-Analyses is an analysis framework for the Future Circular Collider sa
 :link: cards-clickable
 :link-type: ref
 
+The entire card can be clicked to navigate to the `cards-clickable` reference target.
+:::
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
