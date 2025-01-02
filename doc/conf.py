@@ -23,6 +23,13 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
+html_context = {
+    "github_user": "prayagyadav",
+    "github_repo": "coffea-fcc-analyses",
+    "github_version": "main",
+    "doc_path": "doc",
+}
+
 # html_theme = 'sphinx_rtd_theme'
 html_theme = "pydata_sphinx_theme"
 
@@ -35,15 +42,9 @@ html_css_files = [
 # -- Theme options ------------------------------------------------------------
 # https://sphinx-nefertiti.readthedocs.io/en/latest/quick-start.html#customize-the-theme
 html_theme_options = {
-  "repository_name": "prayagyadav/coffea-fcc-analyses",
-  "repository_url": "https://github.com/prayagyadav/coffea-fcc-analyses",
-  "footer_links": ",".join([
-  "Documentation|https://prayagyadav.github.io/coffea-fcc-analyses",
-  "Repository|https://github.com/prayagyadav/coffea-fcc-analyses",
-  "Issues|https://github.com/prayagyadav/coffea-fcc-analyses/issues",
-  "COFFEA|https://github.com/CoffeaTeam/coffea",
-  "FCCAnalyses|https://github.com/HEP-FCC/FCCAnalyses"
- ])
+    "github_url": "https://github.com/prayagyadav/coffea-fcc-analyses",
+    "navbar_start" : ["navbar-logo", "version-switcher"],
+    "navbar_end": ["theme-switcher", "navbar-icon-links"],
+    "footer_start": ["copyright", "sphinx-version", "funding"],
 }
-html_theme_options["navbar_start"] = ["navbar-logo", "version-switcher"]
 
