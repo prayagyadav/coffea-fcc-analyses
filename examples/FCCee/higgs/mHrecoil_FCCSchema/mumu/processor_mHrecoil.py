@@ -108,19 +108,16 @@ class mHrecoil(processor.ProcessorABC):
 
         #Create a Packed Selection object to get a cutflow later
         cut = PackedSelection()
-        cut.add('No cut', dak.ones_like(dak.num(get(events,'ReconstructedParticles','energy'),axis=1),dtype=bool))
+        cut.add('No cut', dak.ones_like(dak.num(events.ReconstructedParticles, axis=1),dtype=bool))
 
         # Filter out any event with no reconstructed particles and generate Reconstructed Particle Attributes
         #ak.mask preserves array length
-        at_least_one_recon = dak.num(get(events,'ReconstructedParticles','energy'), axis=1) > 0
+        at_least_one_recon = dak.num(events.ReconstructedParticles, axis=1) > 0
         good_events = dak.mask(events,at_least_one_recon)
         cut.add('At least one Reco Particle', at_least_one_recon)
 
-        Reco = get_all(good_events,'ReconstructedParticles')
-        Muons = get_reco(Reco,'Muon#0',good_events)
-
-        # Create Array of Muon Lorentz Vector
-        Muon = ak.zip({"px":Muons.momentum_x,"py":Muons.momentum_y,"pz":Muons.momentum_z,"E":Muons.energy,"q":Muons.charge,}, with_name="Momentum4D")
+        Reco = events.ReconstructedParticles
+        Muon = good_events.ReconstructedParticles.match_collection(events.Muonidx0)
 
         # Get Muons with a pt cut , if none of the muons in an event pass the cut, return none, ensuring the size of the cutflow
         pt_mask = dak.any(Muon.pt > 10, axis = 1)
