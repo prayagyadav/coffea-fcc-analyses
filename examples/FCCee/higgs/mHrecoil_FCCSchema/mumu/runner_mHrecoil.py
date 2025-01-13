@@ -1,3 +1,4 @@
+from coffea.nanoevents import FCC
 # Define the requirements
 
 process = {
@@ -313,7 +314,7 @@ queue 1'''
             to_compute = apply_to_fileset(
                         mHrecoil(ecm=ecm),
                         max_chunks(dataset_runnable[i], inputs.maxchunks),
-                        schemaclass=BaseSchema,
+                        schemaclass=FCC.get_schema('pre-edm4hep1'),
             )
             computed = dask.compute(to_compute)
             (Out,) = computed
