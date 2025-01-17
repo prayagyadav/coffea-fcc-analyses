@@ -12,7 +12,7 @@ subtrees:
       - file: examples/index
         title: "Examples"
 
-      - file: licence
+      - file: license
         title: "License"
       # - file: user-guide/index
       #   subtrees:
