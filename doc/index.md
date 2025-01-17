@@ -12,10 +12,6 @@ COFFEA-FCC-Analyses is an analysis framework for the Future Circular Collider sa
     <div class="flex justify-center items-cente m-2">
       <svg version="1.1" id="Uploaded to svgrepo.com" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
 	 width="800px" height="800px" viewBox="0 0 32 32" xml:space="preserve">
-<style type="text/css">
-	.stone_een{fill:#111918;}
-	.st0{fill:#0B1719;}
-</style>
 <path class="stone_een" d="M17.707,17l-5-5h4.586l5,5H17.707z M4,15c-0.353,0-0.686-0.072-1-0.184V17h7.293l-3.635-3.635
 	C6.159,14.332,5.163,15,4,15z M27.659,8.761c0.547-0.072,0.933-0.574,0.861-1.121l-0.13-0.992c-0.057-0.436-0.214-0.832-0.432-1.184
 	l-2.392,3.573L27.659,8.761z M24.247,9.21l3.025-4.518c-0.516-0.409-1.161-0.655-1.853-0.655c-0.13,0-0.261,0.008-0.394,0.026
