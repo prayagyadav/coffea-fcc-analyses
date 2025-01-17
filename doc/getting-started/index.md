@@ -8,13 +8,8 @@ Start with cloning the repository
    git clone https://github.com/prayagyadav/coffea-fcc-analyses.git
 ```
 
-## Dependencies:
-A} Access to `LXPLUS`
-   `Singularity` containers for `COFFEA` are available in `LXPLUS` through `/cvmfs`
-
-B} Locally, one can install `COFFEA` through `pip`, `conda` or download a `docker` or `singularity` container
-
-It is recommended that `LXPLUS` be used for all the analyses. If installed locally, one should ensure the `Python` version used be `< 3.13.0`.
+## Dependencies
+Access to `LXPLUS` is a recommended requirement. This is because, `Singularity` containers for `COFFEA` are available in `LXPLUS` through `/cvmfs`. Locally, one can install `COFFEA` through `pip`, `conda` or download a `docker` or `singularity` container. If installed locally, one should ensure the `Python` version used be `< 3.13.0`.
 
 ## Requirements
 
