@@ -1,5 +1,7 @@
 sphinx_rtd_theme==3.0.2
+PyYAML
 pydata-sphinx-theme
 sphinx-copybutton
 myst-nb
 myst-parser
+sphinx-external-toc
