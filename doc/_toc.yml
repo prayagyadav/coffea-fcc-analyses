@@ -8,14 +8,12 @@ subtrees:
   - entries:
       - file: getting-started/index
         title: "Getting Started"
-       # subtrees:
-       #   - entries:
-       #       - file: getting-started/what-is-an-awkward-array
-       #       - file: getting-started/10-minutes-to-awkward-array
-       #       - file: getting-started/uproot-awkward-columnar-hats
-       #       - file: getting-started/jagged-ragged-awkward-arrays
-       #       - file: getting-started/thinking-in-arrays
-       #       - file: getting-started/papers-and-talks
+
+      - file: examples/index
+        title: "Examples"
+
+      - file: licence
+        title: "License"
       # - file: user-guide/index
       #   subtrees:
       #     - entries:
