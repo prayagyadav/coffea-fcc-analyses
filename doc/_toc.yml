@@ -1,0 +1,33 @@
+root: index
+title: "COFFEA FCC Analyses"
+
+defaults:
+  titlesonly: True
+
+subtrees:
+  - entries:
+      - file: getting-started/index
+        title: "Getting Started"
+       # subtrees:
+       #   - entries:
+       #       - file: getting-started/what-is-an-awkward-array
+       #       - file: getting-started/10-minutes-to-awkward-array
+       #       - file: getting-started/uproot-awkward-columnar-hats
+       #       - file: getting-started/jagged-ragged-awkward-arrays
+       #       - file: getting-started/thinking-in-arrays
+       #       - file: getting-started/papers-and-talks
+      # - file: user-guide/index
+      #   subtrees:
+      #     - entries:
+      #         - file: user-guide/how-to-convert
+      #           title: "Converting arrays"
+      #           subtrees:
+      #             - entries:
+      #                 - file: user-guide/how-to-convert-numpy
+      #                   title: "NumPy"
+      #                 - file: user-guide/how-to-convert-python
+      #                   title: "Python objects"
+      #                 - file: user-guide/how-to-convert-json
+      #                   title: "JSON"
+      #                 - file: user-guide/how-to-convert-arrow
+           
