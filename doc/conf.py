@@ -16,6 +16,7 @@ author = 'Prayag Yadav'
 
 extensions = [
     "sphinx_copybutton",
+    "myst_nb"
 ]
 
 templates_path = ['_templates']
