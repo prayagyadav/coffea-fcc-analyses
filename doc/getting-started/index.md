@@ -9,19 +9,19 @@ Start with cloning the repository
 ```
 
 ## Dependencies:
-A} Access to LXPLUS
-   Singularity containers for COFFEA are available in LXPLUS through /cvmfs
+A} Access to `LXPLUS`
+   `Singularity` containers for `COFFEA` are available in `LXPLUS` through `/cvmfs`
 
-B} Locally, one can install COFFEA through pip, conda or download a docker/singularity container
+B} Locally, one can install `COFFEA` through `pip`, `conda` or download a `docker` or `singularity` container
 
-It is recommended that LXPLUS be used for all the analyses. If installed locally, one should ensure the Python version used be < 3.13.0.
+It is recommended that `LXPLUS` be used for all the analyses. If installed locally, one should ensure the `Python` version used be `< 3.13.0`.
 
 ## Requirements
 
 1. Access to `/cvmfs`
 2. Access to `/eos`
-3. To have read access to the FCC pre-generated samples, one needs to be
-   subscribed to the following e-group (with owner approval):
+3. To have read access to the `FCC` pre-generated samples, one needs to be
+   subscribed to the following `e-group` (with the owner's approval):
    `fcc-eos-access`
 
 ## Workflow
@@ -41,7 +41,7 @@ C. Set up all the environment variables with sourcing `setup.sh`,
 source setup.sh
 ```
 
-D. Start a singularity shell with COFFEA-2025 with
+D. Start a singularity shell containing `COFFEA-2025.1.0` with
 ``` bash
 ./shell
 ```
@@ -49,14 +49,14 @@ One can also call a version other than the default with:
 ``` bash
 ./shell coffeateam/<name of the desired container>
 ```
-A full list of all the available COFFEA containers are at `/cvmfs/unpacked.cern.ch/registry.hub.docker.com/coffeateam/`.
+A full list of all the available `COFFEA` containers are at `/cvmfs/unpacked.cern.ch/registry.hub.docker.com/coffeateam/`.
 
-(Please note that `coffea-fcc-analysis` is only compatible with containers with COFFEA version >= 2024.10.0)
+(Please note that `coffea-fcc-analysis` is only compatible with containers with `COFFEA version >= 2024.10.0`)
 
-One can also modify ``shell`` for personalized workflows by editing it. The current contents of
-``shell`` are :
+One can also modify `shell` for personalized workflows by editing it. The current contents of
+`shell` are :
 
-.. code:: bash
+``` bash
 
    #!/usr/bin/env bash
 
@@ -73,3 +73,4 @@ One can also modify ``shell`` for personalized workflows by editing it. The curr
    singularity exec -B /etc/condor -B /eos -B /afs -B /cvmfs --pwd ${PWD} \
        /cvmfs/unpacked.cern.ch/registry.hub.docker.com/${COFFEA_IMAGE} \
        /bin/bash --rcfile /srv/.bashrc
+```
