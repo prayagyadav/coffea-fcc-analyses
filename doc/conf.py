@@ -16,6 +16,7 @@ author = 'Prayag Yadav'
 
 extensions = [
     "sphinx_copybutton",
+    "sphinx_external_toc",
     "myst_nb"
 ]
 
@@ -42,6 +43,7 @@ html_css_files = [
     'css/custom.css',
 ]
 
+master_doc = "index"
 
 # -- Theme options ------------------------------------------------------------
 # https://sphinx-nefertiti.readthedocs.io/en/latest/quick-start.html#customize-the-theme
