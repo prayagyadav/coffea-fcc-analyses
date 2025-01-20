@@ -43,4 +43,4 @@ A full list of all the available COFFEA containers are at `/cvmfs/unpacked.cern.
 ### FCC-ee
 - Higgs
    - mHrecoil
-      - [mHrecoil_mumu](./examples/FCCee/higgs/mHrecoil/mumu/mHrecoil_mumu.md)
+      - [mHrecoil_mumu](./FCCee/higgs/mHrecoil/mumu/mHrecoil_mumu.md)
