@@ -54,7 +54,7 @@ html_theme_options = {
     "navbar_end": ["version-switcher", "theme-switcher", "navbar-icon-links"],
     "footer_start": ["copyright", "sphinx-version", "funding"],
     "switcher": {
-        "json_url": "https://coffea-fcc-analyses.readthedocs.io/en/latest/switcher.json",
+        "json_url": "https://coffea-fcc-analyses.readthedocs.io/en/latest/_static/switcher.json",
         "version_match": 0.1,
     },
     "secondary_sidebar_items": ["page-toc", "sourcelink"]
