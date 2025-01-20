@@ -1,23 +1,30 @@
-from config import *
+from coffea.nanoevents import FCC
+# Define the requirements
+
+process = {
+    'collider':'FCCee',
+    'campaign':'spring2021',
+    'detector':'IDEA',
+    'samples':['p8_ee_ZZ_ecm240','p8_ee_WW_ecm240','p8_ee_ZH_ecm240']
+}
+fraction = {
+    'p8_ee_ZZ_ecm240':0.005,
+    'p8_ee_WW_ecm240':0.5,
+    'p8_ee_ZH_ecm240':0.2
+}
+ecm = 240.0 # #\sqrt(s) in GeV
 
 if __name__=="__main__":
-    import sys
-    import os
-    local_dir = os.environ['LOCAL_DIR']
-    sys.path.append(local_dir)
+    from coffea import util
     import argparse
     from coffea.nanoevents import BaseSchema
-    try:
-        from coffea.nanoevents import FCC
-    except:
-        from scripts.schema.fcc import FCC
     import numpy as np
     import yaml
     import os
     import subprocess
+    from processor_mHrecoil import mHrecoil
     from coffea.dataset_tools import apply_to_fileset,max_chunks,preprocess
     from coffea.analysis_tools import Cutflow
-    from coffea import util
     import dask
     import copy
     import time
@@ -35,21 +42,21 @@ if __name__=="__main__":
         "--executor",
         choices=["condor", "dask"],
         help="Enter where to run the file : dask(local) or condor (Note: Only dask(local) works at the moment)",
-        default=executor,
+        default="dask",
         type=str
     )
     parser.add_argument(
         "-o",
         "--outfile",
         help="Enter the base-name of the coffea file to output with .coffea extension. By default: 'mHrecoil_mumu'",
-        default=output_filename,
+        default="mHrecoil_mumu",
         type=str
     )
     parser.add_argument(
         "-p",
         "--path",
         help="Enter the path to save the output files. By default 'outputs/FCCee/higgs/mH-recoil/mumu/')",
-        default=output_path,
+        default="outputs/FCCee/higgs/mH-recoil/mumu/",
         type=str
     )
     parser.add_argument(
@@ -66,12 +73,6 @@ if __name__=="__main__":
         type=int,
         default=1
         )
-    parser.add_argument(
-        "-cc",
-        "--cachedchunks",
-        help="Skip the chunks that are already computed",
-        action='store_true'
-        )
 
     inputs = parser.parse_args()
 
@@ -80,20 +81,13 @@ if __name__=="__main__":
     ###################################
     output_file = inputs.outfile+".coffea"
     path = inputs.path
-    schema = BaseSchema
-    if use_schema == "FCC":
-        schema = FCC.get_schema(schema_version)
 
     def load_yaml_fileinfo(process):
         '''
         Loads the yaml data for filesets
         '''
         onlinesystem_path = '/cvmfs/fcc.cern.ch'
-        # localsystem_path = './../../../../../filesets/'
-        if 'local_yaml_dict' in globals():
-            localsystem_path = local_yaml_dict
-        else :
-            localsystem_path = 'filesets/'
+        localsystem_path = './../../../../../filesets/'
         path = '/'.join(
             [
              'FCCDicts',
@@ -110,13 +104,13 @@ if __name__=="__main__":
             filesystem_path = localsystem_path
         yaml_dict = {}
         for sample in process['samples']:
-            full_path = '/'.join([filesystem_path, path, sample, 'merge.yaml'])
+            full_path = '/'.join([filesystem_path,path,sample,'merge.yaml'])
             try :
                 with open(full_path) as f:
                     dict = yaml.safe_load(f)
                 print('Loaded : '+full_path)
             except:
-                raise FileNotFoundError(f'Could not find yaml files at {filesystem_path}')
+                raise FileNotFoundError('Could not find yaml files at {filesystem_path}')
             yaml_dict[sample] = dict
         return yaml_dict
 
@@ -223,23 +217,22 @@ if __name__=="__main__":
     def create_job_python_file(ecm, dataset_runnable, maxchunks,filename, output_file):
         s = f'''
 from coffea import util
-from coffea.nanoevents import BaseSchema, FCC #fix import of FCC on condor
+from coffea.nanoevents import BaseSchema
 import os
+from processor_mHrecoil import mHrecoil
 from coffea.dataset_tools import apply_to_fileset,max_chunks
 import dask
-from {processor_path} import {processor_name}
 
 dataset_runnable = {dataset_runnable}
 maxchunks = {maxchunks}
 
 to_compute = apply_to_fileset(
-            {processor_name}(*{processor_args},**{processor_kwargs}),
+            mHrecoil(ecm={ecm}),
             max_chunks(dataset_runnable, maxchunks),
-            schemaclass={schema},
+            schemaclass=BaseSchema,
 )
 computed = dask.compute(to_compute)
 (Output,) = computed
-                output_filename = output_file.strip('.coffea')+f'-chunk{i}'+'.coffea'
 
 print("Saving the output to : " , "{output_file}")
 util.save(output= Output, filename="{output_file}")
@@ -295,7 +288,6 @@ queue 1'''
     raw_yaml = load_yaml_fileinfo(process)
     myfileset = get_fileset(raw_yaml, fraction, redirector='root://eospublic.cern.ch/')
     fileset = break_into_many(input_fileset=myfileset,n=inputs.chunks)
-    
 
     print('Preparing fileset before run...')
 
@@ -315,31 +307,25 @@ queue 1'''
     if inputs.executor == "dask" :
         if not os.path.exists(path):
             os.makedirs(path)
-        #Output = []
+        Output = []
         print("Executing locally with dask ...")
-        computed_chunks = os.listdir(path)
         for i in range(len(dataset_runnable)):
             print('Chunk : ',i)
-            output_filename = output_file.strip('.coffea')+f'-chunk{i}'+'.coffea'
-            if output_filename in computed_chunks and inputs.cachedchunks:
-                print(output_filename, " is already computed.")
-                continue
             to_compute = apply_to_fileset(
-                        processor,
+                        mHrecoil(ecm=ecm),
                         max_chunks(dataset_runnable[i], inputs.maxchunks),
-                        schemaclass=schema,
-                        uproot_options={"filter_name": lambda x : "PARAMETERS" not in x}
+                        schemaclass=FCC.get_schema('pre-edm4hep1'),
             )
-            computed = dask.compute(to_compute, num_workers=8)
+            computed = dask.compute(to_compute)
             (Out,) = computed
-            #Output.append(Out)
-            if inputs.chunks < 2:
+            Output.append(Out)
+            if inputs.chunks > 1:
+                output_filename = output_file.strip('.coffea')+f'-chunk{i}'+'.coffea'
+            else:
                 output_filename = output_file
             print("Saving the output to : " , output_filename)
             util.save(output= Out, filename=path+output_filename)
             print(f"File {output_filename} saved at {path}")
-            del computed
-            del Out
         print("Execution completed.")
 
     #For condor execution
@@ -374,7 +360,7 @@ queue 1'''
             create_submit_file(
                 filename=f'submit_{i}.sh',
                 executable=f'job_{i}.sh',
-                input=f'{pwd}/{batch_dir}/job_{i}.py,{pwd}/{processor_path}.py',
+                input=f'{pwd}/{batch_dir}/job_{i}.py,{pwd}/processor_mHrecoil.py',
                 output=f'singularity.log.job_{i},{output_filename}'
             )
             subprocess.run(['chmod','u+x',f'submit_{i}.sh'])

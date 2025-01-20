@@ -3,13 +3,12 @@ import  collections, argparse, hist, copy, glob, os, re
 from matplotlib.ticker import MultipleLocator, AutoMinorLocator
 from coffea.util import load
 from pandas.core.indexes.base import Level
-from config import *
+from processor_mHrecoil import plot_props
+from runner_mHrecoil import ecm
 
 ##################################
 # Definition of useful functions #
 ##################################
-
-plot_props = pd.DataFrame(plots)
 
 def get_subdict(dicts, key):
     '''
@@ -67,16 +66,16 @@ def get_xsec_scale(dataset, raw_events, Luminosity):
         raise ValueError('Raw events less than of equal to zero!')
     return round(float(sf),3)
 
-def yield_plot(name, title, keys, scaled, unscaled, formats, path, plot_width=8, plot_height=8):
+def yield_plot(name, title, keys, scaled, unscaled, formats, path):
     '''
     Create yield plots
     '''
 
-    fig, ax = plt.subplots(figsize=(plot_width,plot_height))
+    fig, ax = plt.subplots(figsize=(8,8))
     ax.text(0.25, 1.02, 'FCC Analyses: FCC-ee Simulation (Delphes)', fontsize=10, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
     ax.text(0.92, 1.02, '$\\sqrt{s} = '+str(energy)+' GeV$', fontsize=10, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
     ax.text(0.10, 0.95, collider, fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-    ax.text(0.10, 0.88,'Delphes Version: '+ delphesVersion, fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+    ax.text(0.10, 0.88,'Delphes Version: '+delphesVersion, fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
     ax.text(0.10, 0.81, 'Signal : $'+ana_tex+'$', fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
     ax.text(0.10, 0.74, '$L = '+str(intLumi/1e6)+' ab^{-1}$', fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
 
@@ -139,7 +138,7 @@ def cuts_table(name, title, labels, formats, path):
         print(filename, " saved at ", path)
     plt.close()
 
-def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, formats, path, plotprops):
+def plots(input_dict, req_hists, req_plots, selections, stack, log, formats, path, plotprops):
     '''
     Batch plot processor: Creates Yield, Cutflow and Kinematic plots
     '''
@@ -243,8 +242,7 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
             scaled=hist_list_signal+hist_list,
             unscaled=unscaled_hist_list_signal+unscaled_hist_list,
             formats=formats,
-            path=plot_path_selection,
-            plot_width=12
+            path=plot_path_selection
         )
         print('---------------------------------------------------------------')
 
@@ -255,9 +253,7 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
         # Start plotting
         for hist_name in req_plots+['Cutflow']:
             hist = [hists[hist_name] for hists in hist_list]
-            n_bkgs = len(hist)
             hist_signal = [hists[hist_name] for hists in hist_list_signal]
-            n_sig = len(hist_signal)
             cutflow_mode=False
             if hist_name =='Cutflow':
                 cutflow_mode=True
@@ -284,11 +280,10 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
                         stack=True, #Always stack backgrounds
                         color=color_list,
                         histtype='fill',
-                        cutflow_mode=cutflow_mode,
-                        xticks=8
+                        cutflow_mode=cutflow_mode
                     )
                     #Signal
-                    if stack_mode and n_bkgs != 0:
+                    if stack_mode :
                         sigl_hist = sum(hist_signal)+sum(hist) #Manual stacking because independent stacking is not supported in mplhep
                     else :
                         sigl_hist = hist_signal
@@ -303,7 +298,6 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
                         ax=ax
                     )
                     fig.legend(prop={"size":10},loc= (0.74,0.74) )
-
                     if log_mode :
                         log_mode_text = 'log'
                     else :
@@ -326,21 +320,19 @@ def makeplot(fig, ax, hist, name, title, label, xlabel, ylabel, bins, xmin, xmax
     '''
     Makes a single kinematic plot on an ax object
     '''
-    # plt.ylim(1,1000000)
-    if len(hist) != 0 :
-        hep.histplot(
-            hist,
-            yerr=0,
-            histtype=histtype,
-            label=label,
-            color=color,
-            alpha=0.8,
-            stack=stack,
-            edgecolor='black',
-            linewidth=1,
-            sort='yield',
-            ax=ax
-        )
+    hep.histplot(
+        hist,
+        yerr=0,
+        histtype=histtype,
+        label=label,
+        color=color,
+        alpha=0.8,
+        stack=stack,
+        edgecolor='black',
+        linewidth=1,
+        sort='yield',
+        ax=ax
+    )
 
     ax.text(0.27, 1.02, 'FCC Analyses: FCC-ee Simulation (Delphes)', fontsize=9, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
     ax.text(0.92, 1.02, f'$\\sqrt{{s}} = {energy} GeV$', fontsize=9, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
@@ -372,10 +364,36 @@ parser.add_argument(
     "-i",
     "--input",
     help="Enter the input directory where the coffea files are saved",
-    default=input_path,
+    default="outputs/FCCee/higgs/mH-recoil/mumu",
     type=str
 )
 inputs = parser.parse_args()
+
+
+##################################
+# Choose the required plots here #
+##################################
+selections = ['sel0','sel1']
+stack = [True, False]
+log = [True, False]
+formats = ['png','pdf']
+req_plots = ['Zm', 'Zm_zoom', 'Recoilm', 'Recoilm_zoom', 'Recoilm_zoom1']
+req_hists = {
+    "ZH":{"type":'Signal',"datasets":['p8_ee_ZH_ecm240'],"color":'r'},
+    "ZZ":{"type":'Background',"datasets":['p8_ee_ZZ_ecm240'],"color":'g'},
+    "WW":{"type":'Background',"datasets":['p8_ee_WW_ecm240'],"color":'b'}
+}
+cross_sections = {#in pb-1 # Taken as is from FCC events catalogue at https://fcc-physics-events.web.cern.ch/FCCee/spring2021/Delphesevents_IDEA.php
+    'p8_ee_WW_ecm240': 16.4385,
+    'p8_ee_ZZ_ecm240': 1.35899,
+    'p8_ee_ZH_ecm240': 0.201868
+}
+plot_path = 'outputs/FCCee/higgs/mH-recoil/mumu/plots/'
+intLumi        = 5.0e+06 #in pb-1
+ana_tex        = 'e^{+}e^{-} \\rightarrow ZH \\rightarrow \\mu^{+}\\mu^{-} + X'
+delphesVersion = '3.4.2'
+energy         = ecm #in GeV
+collider       = 'FCC-ee'
 
 
 #########################
@@ -383,7 +401,7 @@ inputs = parser.parse_args()
 #########################
 #Input configuration
 input_path = inputs.input+"/"
-base_filename = output_filename+".coffea"
+base_filename = "mHrecoil_mumu.coffea"
 print(f'Current configuration:\n\tinput_path:\t{input_path}\n\tbase_filename:\t{base_filename}\n')
 print("Loading coffea files...")
 
@@ -428,4 +446,4 @@ print("Plotting...")
 if not os.path.exists(plot_path):
     os.makedirs(plot_path)
 
-generate_plots(input, req_hists, req_plots, selections, stack, log, formats, plot_path, plot_props)
+plots(input, req_hists, req_plots, selections, stack, log, formats, plot_path,plot_props)
