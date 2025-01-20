@@ -1,4 +1,8 @@
-![logo](https://coffea-fcc-analyses.readthedocs.io/en/latest/_static/coffea-fcc-analyses-logo-inverted.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/prayagyadav/coffea-fcc-analyses/refs/heads/main/doc/_static/coffea-fcc-analyses-logo-inverted.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/prayagyadav/coffea-fcc-analyses/refs/heads/main/doc/_static/coffea-fcc-analyses-logo.png">
+  <img alt="COFFEA-FCC-Analyses-logo" src="https://raw.githubusercontent.com/prayagyadav/coffea-fcc-analyses/refs/heads/main/doc/_static/coffea-fcc-analyses-logo.png">
+</picture>
 
 # COFFEA FCC Analyses
 
