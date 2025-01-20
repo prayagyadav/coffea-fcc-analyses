@@ -37,7 +37,6 @@ html_context = {
 # html_theme = 'sphinx_rtd_theme'
 html_theme = "pydata_sphinx_theme"
 html_title = "COFFEA-FCC-Analyses"
-html_logo="_static/coffea-fcc-analyses-logo.png"
 
 html_static_path = ['_static']
 html_css_files = [
@@ -50,6 +49,10 @@ master_doc = "index"
 # https://sphinx-nefertiti.readthedocs.io/en/latest/quick-start.html#customize-the-theme
 html_theme_options = {
     "github_url": "https://github.com/prayagyadav/coffea-fcc-analyses",
+    "logo": {
+      "image_light": "_static/coffea-fcc-analyses-logo.png",
+      "image_dark": "_static/coffea-fcc-analyses-logo-inverted.png",
+   },
     "navbar_start" : ["navbar-logo"],
     # "navbar_center": [],
     "navbar_end": ["version-switcher", "theme-switcher", "navbar-icon-links"],
