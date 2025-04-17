@@ -6,3 +6,4 @@ src/__pycache__/
 .ipynb_checkpoints/
 src/.ipynb_checkpoints/
 development/.ipynb_checkpoints/
+notebooks/eos/
