@@ -11,24 +11,23 @@ fi
 
 
 
-# List of required Python packages
-REQUIRED_PACKAGES=("coffea" "awkward" "numpy" "dask" "dask-awkward" "mplhep" "numba" "vector" "fastjet" "hist")  # Add any packages you need
+# # List of required Python packages
+# REQUIRED_PACKAGES=("coffea" "awkward" "numpy" "dask" "mplhep" "numba" "vector" "fastjet" "hist")
 
-# Function to check if a package is installed
-check_and_install_package() {
-    package=$1
-    if ! python3 -c "import ${package}" &> /dev/null; then
-        echo "${package} is not installed. Installing..."
-        pip3 install "$package"
-    else
-        echo "${package} is already installed."
-    fi
-}
+# check_and_install_package() {
+#     package=$1
+#     if ! python3 -c "import ${package}" &> /dev/null; then
+#         echo "${package} is not installed. Installing..."
+#         pip3 install "$package"
+#     else
+#         echo "${package} is already installed."
+#     fi
+# }
 
-# Check and install each package
-for package in "${REQUIRED_PACKAGES[@]}"; do
-    check_and_install_package "$package"
-done
+# # Check and install each package
+# for package in "${REQUIRED_PACKAGES[@]}"; do
+#     check_and_install_package "$package"
+# done
 
 
 
@@ -42,7 +41,7 @@ plugins=("fastjet")
 # Loop through the array
 for plugin in "${plugins[@]}"
 do
-    echo "Installing $plugin ..."
+    echo "Installing Plugin: $plugin ..."
     cd $plugin
     make
     cd ..
