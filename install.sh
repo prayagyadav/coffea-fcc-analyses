@@ -43,7 +43,7 @@ for plugin in "${plugins[@]}"
 do
     echo "Installing Plugin: $plugin ..."
     cd $plugin
-    make
+    bash build.sh
     cd ..
 done
 
