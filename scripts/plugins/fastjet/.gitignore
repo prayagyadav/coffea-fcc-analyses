@@ -1,5 +1,5 @@
-MyRecombiner.o
-_recombiner.so
-recombiner.py
-recombiner_wrap.cxx
-recombiner_wrap.o
+Recombiner.o
+_Recombiner.so
+Recombiner.py
+Recombiner_wrap.cxx
+Recombiner_wrap.o
