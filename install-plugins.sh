@@ -12,13 +12,6 @@ fi
 #   For Deb : sudo apt-get update && sudo apt-get install -y libboost-dev libmpfr-dev libgmp-dev swig autoconf libtool
 #   For RHEL: sudo dnf install boost-devel mpfr-devel gmp-devel swig autoconf libtool python3-devel
 
-
-# For maximum stability and reproduceability
-# Run the build in a virtual environment
-
-python3 -m venv temp_env
-source temp_env/bin/activate
-
 # List of required Python dependencies
 REQUIRED_PACKAGES=("fastjet")
 
@@ -39,6 +32,22 @@ for package in "${REQUIRED_PACKAGES[@]}"; do
 done
 
 
+
+# Temporarily install swig within the container
+# cd /tmp
+# wget https://github.com/swig/swig/archive/refs/tags/v4.1.1.tar.gz
+# tar -xzf v4.1.1.tar.gz
+# cd swig-4.1.1
+
+# ./autogen.sh
+# ./configure --prefix=$HOME/.local
+# make -j$(nproc)
+# make install
+
+# Now make sure $HOME/.local/bin is in your PATH:
+# export PATH=$HOME/.local/bin:$PATH
+
+
 # Install plugins
 cd ${LOCAL_DIR}/scripts/plugins
 plugins=("fastjet")
@@ -48,15 +57,10 @@ for plugin in "${plugins[@]}"
 do
     echo "Installing Plugin: $plugin ..."
     cd $plugin
-    make
+    bash build.sh
     cd ..
 done
 
 cd ${LOCAL_DIR}
-
-
-# Delete the build virtual environment
-deactivate
-rm -rf temp_env
 
 echo "Installed all the dependencies successfully."
