@@ -18,6 +18,9 @@ sys.path.append(local_dir)
 import scripts
 from scripts.analyzers import ReconstructedParticle as ReconstructedParticleUtil
 from scripts.analyzers import Jet as JetUtil
+from scripts.plugins.fastjet import Recombiner
+
+E0_Scheme = Recombiner.E0_scheme.instance()
 
 plot_props = pd.DataFrame(plots)
 
@@ -38,7 +41,7 @@ def JetTruthFinder(jet_constituents, mc, findGluons = False):
     Make sure that jet_constituents and mc, all have
     the same number of events.
 
-    We have to return the PDGID of the 
+    We have to return the PDGID of the
     best matched genParton to the jets (by inspecting its dr with the jet constituents)
 
     """
@@ -46,9 +49,9 @@ def JetTruthFinder(jet_constituents, mc, findGluons = False):
         parton_cut = (abs(mc.PDG) <= 6)
     else: #only quarks and gluons
         parton_cut = (abs(mc.PDG) <= 6) | (abs(mc.PDG) == 21)
-    
+
     genPartons = mc[parton_cut]
-    
+
     jetcon_b, genParton_b = ak.unzip(ak.cartesian((jet_constituents[:,:,np.newaxis], genPartons[:,np.newaxis])))
     all_dr = jetcon_b.deltaR(genParton_b)
     sum_dr = ak.sum(all_dr, axis=3)
@@ -61,7 +64,7 @@ def easier_JetTruthFinder(jets, mc, findGluons = False):
     Make sure that jets and mc, all have
     the same number of events.
 
-    We have to return the PDGID of the 
+    We have to return the PDGID of the
     best matched genParton to the jets (by inspecting its dr with the jet constituents)
 
     But maybe there is a better way? What if we just find
@@ -92,14 +95,14 @@ class jetclustering(processor.ProcessorABC):
         pass
 
     def process(self,events):
-        
+
         # Object Selections
         Muons = events.ReconstructedParticles.match_collection(events.Muonidx0)
         sel_muon_p_gt_25 = Muons.p > 25.0
         Muons = Muons[sel_muon_p_gt_25]
         Z = ReconstructedParticleUtil.resonanceBuilder(Muons, 91.0)
         Recoil = ReconstructedParticleUtil.recoilBuilder(Z, 240.0)
-        
+
         #Event Selections
         cuts = PackedSelection()
         cuts.add("n_gte_2_Muons", ak.num(Muons, axis=1) >= 2 )
@@ -113,7 +116,7 @@ class jetclustering(processor.ProcessorABC):
         # Apply the event selections
         Good_Z = Z[cuts.all()]
         Good_Recoil = Recoil[cuts.all()]
-        
+
         # The remove function removes those matched indices provided as argument 2
         # To remove muons with p greater than 25, we have to use that cut on indices
         # before passing on to the remove function
@@ -131,7 +134,7 @@ class jetclustering(processor.ProcessorABC):
         )
         arg_sort_pt = ak.argsort(pseudo_jets.pt)
         jetdef = fastjet.JetDefinition0Param(fastjet.ee_kt_algorithm)
-        jetdef.set_python_recombiner(JetUtil.E0_scheme)
+        jetdef.set_recombiner(E0_Scheme)
         cluster = fastjet.ClusterSequence(pseudo_jets[arg_sort_pt], jetdef)
         jets = cluster.exclusive_jets(2)
         jet_constituents = cluster.exclusive_jets_constituents(2)
@@ -160,16 +163,6 @@ class jetclustering(processor.ProcessorABC):
                 'sel': {'Onecut':sel_ocl[0],'Cutflow':sel_ocl[1],'Labels':sel_ocl[2]},
             }
         }
-        
-        del jet_constituents
-        del jets
-        del dijets
-        del cluster
-        del jetdef
-        del rps_no_mu
-        del pseudo_jets
-        del Good_Z
-        del Good_Recoil
 
         return Output
 
