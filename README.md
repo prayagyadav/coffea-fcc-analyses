@@ -10,6 +10,46 @@ COFFEA-FCC-Analyses is an analysis framework for the Future Circular Collider sa
 
 Check out the latest documentation at [https://coffea-fcc-analyses.readthedocs.io/en/latest/index.html](https://coffea-fcc-analyses.readthedocs.io/en/latest/index.html).
 
+___
+## Quick start
+
+1. Clone this repository
+
+```bash
+    git clone https://github.com/prayagyadav/coffea-fcc-analyses.git
+```
+
+2. Before starting each session, setup the environment variables with setup.sh
+
+```bash
+    source setup.sh
+```
+
+3. If using on lxplus (Recommended), start a singularity session with shell
+
+```bash
+    ./shell
+```
+
+4. Install extra plugins with install-plugins.sh
+
+```bash
+    source install-plugins.sh
+```
+If using a singularity container on lxplus (Recommended), run the installing script from within the container.
+```bash
+    ./shell
+    singularity>
+    singularity> source install-plugins.sh
+```
+
+---
+## Examples
+
+1. Find out working examples in the `examples` directory
+
+2. Jupyter notebook demonstrations of the same examples can be found in the notebooks `directory`
+
 ---
 ## People
 <table>
@@ -21,3 +61,6 @@ Check out the latest documentation at [https://coffea-fcc-analyses.readthedocs.i
     </tr>
   </tbody>
 </table>
+
+---
+Support for this work was provided by HSF-India - NSF
