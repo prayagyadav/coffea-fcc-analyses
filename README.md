@@ -36,7 +36,7 @@ ___
 ```bash
     source install-plugins.sh
 ```
-If using a singularity container on lxplus (Recommended), run the installing script from within the container.
+If using a singularity container on lxplus (Recommended), run the installation script from within the container.
 ```bash
     ./shell
     singularity>
@@ -48,7 +48,7 @@ If using a singularity container on lxplus (Recommended), run the installing scr
 
 1. Find out working examples in the `examples` directory
 
-2. Jupyter notebook demonstrations of the same examples can be found in the notebooks `directory`
+2. Jupyter notebook demonstrations of the same examples can be found in the `notebooks` directory
 
 ---
 ## People
