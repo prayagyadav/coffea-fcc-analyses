@@ -32,18 +32,18 @@ for package in "${REQUIRED_PACKAGES[@]}"; do
 done
 
 # Install plugins
-cd ${LOCAL_DIR}/scripts/plugins
 plugins=("fastjet")
 plugins_ld_path=("$(python -c 'import fastjet; print(fastjet.__path__[0])')/_fastjet_core/lib")
 
+cd ${LOCAL_DIR}/scripts/plugins
 # Loop through the array
 for plugin in "${plugins[@]}"; do
   echo "Installing Plugin: $plugin ..."
   cd $plugin
   bash build.sh
+  cd ..
   echo "exporting ${plugins_ld_path[@]} to LD_LIBRARY_PATH}"
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${plugins_ld_path[@]}
-  cd ..
 done
 
 cd ${LOCAL_DIR}
