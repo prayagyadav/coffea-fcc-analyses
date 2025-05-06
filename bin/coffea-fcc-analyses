@@ -1,12 +1,37 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 echo "COFFEA FCC ANALYSES"
 
-echo "Running: ${1}"
-
-if [ "${1}"="init" ]; then
-	echo "Creating project from template ..."
-	mkdir -p ${2}
-	cp -r "${LOCAL_DIR}/"templates/* ${2}
-	echo "Created ${2}"
+# Show help if requested
+if [[ "$1" == "--help" ]]; then
+    echo "Available subcommands:"
+    echo "1. init <name> --> Creates an initial project with foldername as 'name'"
+    exit 0
 fi
+
+# Check if command is provided
+if [[ -z "$1" ]]; then
+    echo "Error: No subcommand provided. Use --help for usage."
+    exit 1
+fi
+
+echo "Running: $1"
+
+# Handle 'init' subcommand
+if [[ "$1" == "init" ]]; then
+    if [[ -z "$2" ]]; then
+        echo "Error: No project name provided for init."
+        exit 1
+    fi
+
+    if [[ -z "$LOCAL_DIR" ]]; then
+        echo "Error: LOCAL_DIR environment variable is not set."
+        exit 1
+    fi
+
+    echo "Creating project from template..."
+    mkdir -p "$2"
+    cp -r "${LOCAL_DIR}/templates/"* "$2"
+    echo "Created project: $2"
+fi
+
