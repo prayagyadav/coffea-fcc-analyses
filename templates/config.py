@@ -23,6 +23,8 @@ output_path = "outputs/FCCee/Example"
 output_filename = "Example"
 executor = "condor" # 'dask' is local and 'condor' is batch
 
+use_schema = "FCC"
+schema_version = "latest"
 
 ###################
 # Plot properties #

@@ -57,7 +57,7 @@ req_plots = ['dijet_m', 'pdgid', 'recoil', 'p_ll', 'm_ll']
 req_hists = {
     "ZH":{"type":'Signal',"datasets":['wzp6_ee_mumuH_Hbb_ecm240'],"color":'r'},
 }
-cross_sections = {#in pb-1 # Taken as is from FCC events catalogue at https://fcc-physics-events.web.cern.ch/FCCee/spring2021/Delphesevents_IDEA.php
+cross_sections = {#in pb-1 # Taken as is from FCC events catalogue at https://fcc-physics-events.web.cern.ch/FCCee/winter2023/Delphesevents_IDEA.php
     'wzp6_ee_mumuH_Hbb_ecm240': 0.00394,
 }
 input_path     = output_path

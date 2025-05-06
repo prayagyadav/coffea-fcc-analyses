@@ -9,6 +9,10 @@ import hist
 import vector
 vector.register_awkward()
 from config import plots
+import sys
+import os
+local_dir = os.environ['LOCAL_DIR']
+sys.path.append(local_dir)
 
 plot_props = pd.DataFrame(plots)
 

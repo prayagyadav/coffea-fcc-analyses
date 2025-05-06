@@ -1,15 +1,23 @@
 from config import *
 
 if __name__=="__main__":
-    from coffea import util
+    import sys
+    import os
+    local_dir = os.environ['LOCAL_DIR']
+    sys.path.append(local_dir)
     import argparse
     from coffea.nanoevents import BaseSchema
+    try:
+        from coffea.nanoevents import FCC
+    except:
+        from scripts.schema.fcc import FCC
     import numpy as np
     import yaml
     import os
     import subprocess
     from coffea.dataset_tools import apply_to_fileset,max_chunks,preprocess
     from coffea.analysis_tools import Cutflow
+    from coffea import util
     import dask
     import copy
     import time
@@ -58,6 +66,12 @@ if __name__=="__main__":
         type=int,
         default=1
         )
+    parser.add_argument(
+        "-cc",
+        "--cachedchunks",
+        help="Skip the chunks that are already computed",
+        action='store_true'
+        )
 
     inputs = parser.parse_args()
 
@@ -66,6 +80,9 @@ if __name__=="__main__":
     ###################################
     output_file = inputs.outfile+".coffea"
     path = inputs.path
+    schema = BaseSchema
+    if use_schema == "FCC":
+        schema = FCC.get_schema(schema_version)
 
     def load_yaml_fileinfo(process):
         '''
@@ -206,7 +223,7 @@ if __name__=="__main__":
     def create_job_python_file(ecm, dataset_runnable, maxchunks,filename, output_file):
         s = f'''
 from coffea import util
-from coffea.nanoevents import BaseSchema
+from coffea.nanoevents import BaseSchema, FCC #fix import of FCC on condor
 import os
 from coffea.dataset_tools import apply_to_fileset,max_chunks
 import dask
@@ -218,10 +235,11 @@ maxchunks = {maxchunks}
 to_compute = apply_to_fileset(
             {processor_name}(*{processor_args},**{processor_kwargs}),
             max_chunks(dataset_runnable, maxchunks),
-            schemaclass=BaseSchema,
+            schemaclass={schema},
 )
 computed = dask.compute(to_compute)
 (Output,) = computed
+                output_filename = output_file.strip('.coffea')+f'-chunk{i}'+'.coffea'
 
 print("Saving the output to : " , "{output_file}")
 util.save(output= Output, filename="{output_file}")
@@ -278,6 +296,7 @@ queue 1'''
     myfileset = get_fileset(raw_yaml, fraction, redirector='root://eospublic.cern.ch/')
     fileset = break_into_many(input_fileset=myfileset,n=inputs.chunks)
 
+
     print('Preparing fileset before run...')
 
     pwd = os.getcwd()
@@ -296,25 +315,31 @@ queue 1'''
     if inputs.executor == "dask" :
         if not os.path.exists(path):
             os.makedirs(path)
-        Output = []
+        #Output = []
         print("Executing locally with dask ...")
+        computed_chunks = os.listdir(path)
         for i in range(len(dataset_runnable)):
             print('Chunk : ',i)
+            output_filename = output_file.strip('.coffea')+f'-chunk{i}'+'.coffea'
+            if output_filename in computed_chunks and inputs.cachedchunks:
+                print(output_filename, " is already computed.")
+                continue
             to_compute = apply_to_fileset(
                         processor,
                         max_chunks(dataset_runnable[i], inputs.maxchunks),
-                        schemaclass=BaseSchema,
+                        schemaclass=schema,
+                        uproot_options={"filter_name": lambda x : "PARAMETERS" not in x}
             )
-            computed = dask.compute(to_compute)
+            computed = dask.compute(to_compute, num_workers=8)
             (Out,) = computed
-            Output.append(Out)
-            if inputs.chunks > 1:
-                output_filename = output_file.strip('.coffea')+f'-chunk{i}'+'.coffea'
-            else:
+            #Output.append(Out)
+            if inputs.chunks < 2:
                 output_filename = output_file
             print("Saving the output to : " , output_filename)
             util.save(output= Out, filename=path+output_filename)
             print(f"File {output_filename} saved at {path}")
+            del computed
+            del Out
         print("Execution completed.")
 
     #For condor execution
