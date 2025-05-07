@@ -37,12 +37,10 @@ plots = {
 #############
 # Processor #
 #############
-from processor import example_processor
 processor_path = "processor"
 processor_name = "example_processor"
 processor_args = []
 processor_kwargs = {}
-processor = example_processor(*processor_args, **processor_kwargs)
 
 
 ######################

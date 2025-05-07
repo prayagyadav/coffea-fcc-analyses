@@ -3,18 +3,16 @@ from config import *
 if __name__=="__main__":
     import sys
     import os
-    local_dir = os.environ['LOCAL_DIR']
-    sys.path.append(local_dir)
     import argparse
     from coffea.nanoevents import BaseSchema
-    try:
-        from coffea.nanoevents import FCC
-    except:
-        from scripts.schema.fcc import FCC
+    from coffea.nanoevents import FCC
     import numpy as np
     import yaml
     import os
     import subprocess
+    import importlib
+    import shutil
+    import tarfile
     from coffea.dataset_tools import apply_to_fileset,max_chunks,preprocess
     from coffea.analysis_tools import Cutflow
     from coffea import util
@@ -24,6 +22,14 @@ if __name__=="__main__":
     from dask.diagnostics import ProgressBar
     pgb = ProgressBar()
     pgb.register()
+
+
+    processor_module = importlib.import_module(processor_path)
+    processor = getattr(processor_module, processor_name)(*processor_args, **processor_kwargs)
+
+
+    # Ship scripts to condor if needed
+    to_ship = "scripts"
 
     ##############################
     # Define the terminal inputs #
@@ -73,6 +79,7 @@ if __name__=="__main__":
         action='store_true'
         )
 
+
     inputs = parser.parse_args()
 
     ###################################
@@ -80,9 +87,34 @@ if __name__=="__main__":
     ###################################
     output_file = inputs.outfile+".coffea"
     path = inputs.path
-    schema = BaseSchema
-    if use_schema == "FCC":
-        schema = FCC.get_schema(schema_version)
+
+    local_dir = os.environ['LOCAL_DIR']
+    coffea_image_path = os.environ['COFFEA_IMAGE_PATH']
+    sys.path.append(local_dir)
+
+    def get_schema(use_schema = "BaseSchema", schema_version = "latest"):
+        '''Import FCC schema caller'''
+        if use_schema == "BaseSchema":
+            import_string = "from coffea.nanoevents import BaseSchema"
+        elif use_schema == "FCC":
+            import_string = "from coffea.nanoevents import FCC"
+        else:
+            raise FileExistsError(f"The requested schema {use_schema} is not available.")
+    
+        [f, import_module, i, schema_caller] = import_string.split(' ')
+        module = importlib.import_module(import_module)
+        schema_handler = getattr(module, schema_caller)
+        if use_schema == "FCC":
+            schema = schema_handler.get_schema(schema_version)
+            schema_name = f"FCC.get_schema('{schema_version}')"
+            if schema is None:
+                raise FileExistsError(f"The requested version {schema_version} for schema {use_schema} is not available.")
+        else:
+            schema = schema_handler
+            schema_name = "BaseSchema"
+        return import_string, schema, schema_name
+
+    schema_import_string , schema, schema_name = get_schema(use_schema, schema_version)
 
     def load_yaml_fileinfo(process):
         '''
@@ -220,10 +252,10 @@ if __name__=="__main__":
 
         return out
 
-    def create_job_python_file(ecm, dataset_runnable, maxchunks,filename, output_file):
+    def create_job_python_file(ecm, dataset_runnable, maxchunks, filename, output_file):
         s = f'''
 from coffea import util
-from coffea.nanoevents import BaseSchema, FCC #fix import of FCC on condor
+{schema_import_string}
 import os
 from coffea.dataset_tools import apply_to_fileset,max_chunks
 import dask
@@ -235,11 +267,11 @@ maxchunks = {maxchunks}
 to_compute = apply_to_fileset(
             {processor_name}(*{processor_args},**{processor_kwargs}),
             max_chunks(dataset_runnable, maxchunks),
-            schemaclass={schema},
+            schemaclass={schema_name},
+            uproot_options={{"filter_name": lambda x : "PARAMETERS" not in x}}
 )
 computed = dask.compute(to_compute)
 (Output,) = computed
-                output_filename = output_file.strip('.coffea')+f'-chunk{i}'+'.coffea'
 
 print("Saving the output to : " , "{output_file}")
 util.save(output= Output, filename="{output_file}")
@@ -252,13 +284,15 @@ print("Execution completed.")
 
     def create_job_shell_file(filename, python_job_file):
         s = f'''#!/usr/bin/bash
-export COFFEA_IMAGE=coffeateam/coffea-dask-almalinux8:2024.5.0-py3.11
-echo "Coffea Image: ${{COFFEA_IMAGE}}"
+export LOCAL_DIR=$(pwd)
+export COFFEA_IMAGE_PATH={coffea_image_path}
+echo "Coffea Image: ${{COFFEA_IMAGE_PATH}}"
 EXTERNAL_BIND=${{PWD}}
 echo $(pwd)
 echo $(ls)
+tar -xvf {to_ship}.tar
 singularity exec -B /etc/condor -B /eos -B /afs -B /cvmfs --pwd ${{PWD}} \
-/cvmfs/unpacked.cern.ch/registry.hub.docker.com/${{COFFEA_IMAGE}} \
+${{COFFEA_IMAGE_PATH}} \
 /usr/local/bin/python3 {python_job_file} -e dask >> singularity.log.{python_job_file.strip('.py')}
 echo $(ls)'''
         with open(filename,'w') as f:
@@ -295,7 +329,7 @@ queue 1'''
     raw_yaml = load_yaml_fileinfo(process)
     myfileset = get_fileset(raw_yaml, fraction, redirector='root://eospublic.cern.ch/')
     fileset = break_into_many(input_fileset=myfileset,n=inputs.chunks)
-
+    
 
     print('Preparing fileset before run...')
 
@@ -356,6 +390,31 @@ queue 1'''
                 output_filename = output_file.strip('.coffea')+f'-chunk{i}'+'.coffea'
             else:
                 output_filename = output_file
+
+            # Zip up the scripts directory and send to condor worker later
+            shutil.make_archive(
+                    base_name=to_ship,
+                    format='tar',
+                    root_dir=local_dir,
+                    base_dir=to_ship
+                    )
+            
+            folder_path = os.path.join(local_dir, to_ship)
+            output_tar = os.path.join(local_dir, to_ship + '.tar')
+            # To remove hidden files from tar
+            with tarfile.open(output_tar, 'w') as tar:
+                for root, dirs, files in os.walk(folder_path):
+                    # Remove hidden directories in-place
+                    dirs[:] = [d for d in dirs if not d.startswith('.')]
+                    for file in files:
+                        if file.startswith('.'):
+                            continue
+                        full_path = os.path.join(root, file)
+                        # Get archive path with the top-level folder included
+                        rel_path = os.path.relpath(full_path, os.path.dirname(folder_path))
+                        tar.add(full_path, arcname=rel_path)
+            
+
             create_job_python_file(
                 ecm,
                 dataset_runnable[i],
@@ -374,7 +433,7 @@ queue 1'''
             create_submit_file(
                 filename=f'submit_{i}.sh',
                 executable=f'job_{i}.sh',
-                input=f'{pwd}/{batch_dir}/job_{i}.py,{pwd}/{processor_path}.py',
+                input=f'{pwd}/{batch_dir}/job_{i}.py,{pwd}/{processor_path}.py,{pwd}/config.py, {pwd}/{batch_dir}/{to_ship}.tar',
                 output=f'singularity.log.job_{i},{output_filename}'
             )
             subprocess.run(['chmod','u+x',f'submit_{i}.sh'])
