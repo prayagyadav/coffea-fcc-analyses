@@ -38,12 +38,12 @@ plots = {
 #############
 # Processor #
 #############
-from processor import jetclustering
+#from processor import jetclustering
 processor_path = "processor"
 processor_name = "jetclustering"
 processor_args = []
 processor_kwargs = {}
-processor = jetclustering(*processor_args, **processor_kwargs)
+#processor = jetclustering(*processor_args, **processor_kwargs)
 
 
 ######################

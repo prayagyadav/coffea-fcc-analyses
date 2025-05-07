@@ -1,16 +1,16 @@
 import awkward
-import dask_awkward
-import numba
 import numpy
 from dask_awkward.lib.core import dask_property
 
-from coffea.nanoevents.methods import base, vector
+from coffea.nanoevents.methods import base, edm4hep, vector
 
 behavior = {}
 behavior.update(base.behavior)
 
 
 class _FCCEvents(behavior["NanoEvents"]):
+    """FCCEvents"""
+
     def __repr__(self):
         return "FCC Events"
 
@@ -25,119 +25,11 @@ def _set_repr_name(classname):
     behavior[classname].__repr__ = namefcn
 
 
-def map_index_to_array(array, index, axis=1):
-    """
-    DESCRIPTION: Creates a slice of input array according to the input index.
-    INPUTS: array (Singly nested)
-            index (Singly or Doubly nested)
-            axis (By default 1, use axis = 2 if index is doubly nested )
-    EXAMPLE:
-            a = awkward.Array([
-                [44,33,23,22],
-                [932,24,456,78],
-                [22,345,78,90,98,24]
-            ])
-
-            a_index = awkward.Array([
-                [0,1,2],
-                [0,1],
-                []
-            ])
-
-            a2_index = awkward.Array([
-                [[0],[0,1],[2]],
-                [[0,1]],
-                []
-            ])
-            >> map_index_to_array(a, a_index)
-                [[44, 33, 23],
-                 [932, 24],
-                 []]
-                ---------------------
-                type: 3 * var * int64
-            >> map_index_to_array(a, a2_index, axis=2)
-                [[[44], [44, 33], [23]],
-                 [[932, 24]],
-                 []]
-                ---------------------------
-                type: 3 * var * var * int64
-
-    """
-    if axis == 1:
-        return array[index]
-    elif axis == 2:
-        axis2_counts_array = awkward.num(index, axis=axis)
-        flat_axis2_counts_array = awkward.flatten(axis2_counts_array, axis=1)
-        flat_index = awkward.flatten(index, axis=axis)
-        trimmed_flat_array = array[flat_index]
-        trimmed_array = awkward.unflatten(
-            trimmed_flat_array, flat_axis2_counts_array, axis=1
-        )
-        return trimmed_array
-    else:
-        raise AttributeError("Only axis = 1 or axis = 2 supported at the moment.")
-
-
-# Function required to create a range array from a begin and end array
-@numba.njit
-def index_range_numba_wrap(begin_end, builder):
-    for ev in begin_end:
-        builder.begin_list()
-        for j in ev:
-            builder.begin_list()
-            for k in range(j[0], j[1]):
-                builder.integer(k)
-            builder.end_list()
-        builder.end_list()
-    return builder
-
-
-def index_range(begin, end):
-    """
-    Function required to create a range array from a begin and end array
-    Example: If,
-            begin = [
-                        [0, 2, 4, 3, ...],
-                        [1, 0, 4, 6, ...]
-                        ...
-                    ]
-            end = [
-                        [1, 2, 5, 5, ...],
-                        [3, 1, 7, 6, ...]
-                        ...
-                    ]
-            then, output is,
-            output = [
-                        [[0], [], [4], [3,4], ...],
-                        [[1,2], [0], [4,5,6], [], ...]
-                        ...
-                    ]
-    """
-    begin_end = awkward.concatenate(
-        (begin[:, :, numpy.newaxis], end[:, :, numpy.newaxis]), axis=2
-    )
-    if awkward.backend(begin) == "typetracer" or awkward.backend(end) == "typetracer":
-        # To make the function dask compatible
-        # here we fake the output of numba wrapper function since
-        # operating on length-zero data returns the wrong layout!
-        # We need the axis 2, therefore, we should return the typetracer layout of [[[]]]
-        awkward.typetracer.length_zero_if_typetracer(
-            begin
-        )  # force touching of the necessary data
-        awkward.typetracer.length_zero_if_typetracer(
-            end
-        )  # force touching of the necessary data
-        return awkward.Array(
-            awkward.Array([[[]]]).layout.to_typetracer(forget_length=True)
-        )
-    return index_range_numba_wrap(begin_end, awkward.ArrayBuilder()).snapshot()
-
-
 @awkward.mixin_class(behavior)
 class MomentumCandidate(vector.LorentzVector):
     """A Lorentz vector with charge
 
-    This mixin class requires the parent class to provide items `px`, `py`, `pz`, `E`, and `charge`.
+    This mixin class requires the parent class to provide the items `px`, `py`, `pz`, `E`, and `charge`.
     """
 
     @awkward.mixin_class_method(numpy.add, {"MomentumCandidate"})
@@ -192,34 +84,22 @@ class MCParticle(MomentumCandidate, base.NanoCollection):
     @dask_property
     def get_daughters_index(self):
         """
-        Obtain the indexes of the daughters of each and every MCParticle
+        Obtain the global indices of the daughters of each and every MCParticle
         - The output is a doubly nested awkward array
         - Needs the presence of Particleidx1 collection
         - The Particleidx1.index contains info about the daughters
         """
-        ranges = index_range(self.daughters.begin, self.daughters.end)
-        return awkward.values_astype(
-            map_index_to_array(self._events().Particleidx1.index, ranges, axis=2),
-            "int64",
-        )
+        return self.daughters.Particleidx1_rangesG
 
     @get_daughters_index.dask
     def get_daughters_index(self, dask_array):
         """
-        Obtain the indexes of the daughters of each and every MCParticle
+        Obtain the global indices of the daughters of each and every MCParticle
         - The output is a doubly nested awkward array
         - Needs the presence of Particleidx1 collection
         - The Particleidx1.index contains info about the daughters
-
-        Note: Seems like all the functions need to mapped manually
         """
-        ranges = dask_awkward.map_partitions(
-            index_range, dask_array.daughters.begin, dask_array.daughters.end
-        )
-        daughters = dask_awkward.map_partitions(
-            map_index_to_array, dask_array._events().Particleidx1.index, ranges, axis=2
-        )
-        return awkward.values_astype(daughters, "int32")
+        return dask_array.daughters.Particleidx1_rangesG
 
     @dask_property
     def get_daughters(self):
@@ -229,7 +109,7 @@ class MCParticle(MomentumCandidate, base.NanoCollection):
         - Needs the presence of Particleidx1 collection
         - The Particleidx1.index contains info about the daughters
         """
-        return map_index_to_array(self, self.get_daughters_index, axis=2)
+        return self._events().Particle._apply_global_index(self.get_daughters_index)
 
     @get_daughters.dask
     def get_daughters(self, dask_array):
@@ -239,40 +119,30 @@ class MCParticle(MomentumCandidate, base.NanoCollection):
         - Needs the presence of Particleidx1 collection
         - The Particleidx1.index contains info about the daughters
         """
-        return map_index_to_array(dask_array, dask_array.get_daughters_index, axis=2)
+        return dask_array._events().Particle._apply_global_index(
+            dask_array.get_daughters_index
+        )
 
     # Parents
     @dask_property
     def get_parents_index(self):
         """
-        Obtain the indexes of the parents of each and every MCParticle
+        Obtain the global indices of the parents of each and every MCParticle
         - The output is a doubly nested awkward array
         - Needs the presence of Particleidx0 collection
         - The Particleidx0.index contains info about the parents
         """
-        ranges = index_range(self.parents.begin, self.parents.end)
-        return awkward.values_astype(
-            map_index_to_array(self._events().Particleidx0.index, ranges, axis=2),
-            "int64",
-        )
+        return self.parents.Particleidx0_rangesG
 
     @get_parents_index.dask
     def get_parents_index(self, dask_array):
         """
-        Obtain the indexes of the parents of each and every MCParticle
+        Obtain the indices of the parents of each and every MCParticle
         - The output is a doubly nested awkward array
         - Needs the presence of Particleidx0 collection
         - The Particleidx0.index contains info about the parents
-
-        Note: Seems like all the functions need to mapped manually
         """
-        ranges = dask_awkward.map_partitions(
-            index_range, dask_array.parents.begin, dask_array.parents.end
-        )
-        daughters = dask_awkward.map_partitions(
-            map_index_to_array, dask_array._events().Particleidx0.index, ranges, axis=2
-        )
-        return awkward.values_astype(daughters, "int32")
+        return dask_array.parents.Particleidx0_rangesG
 
     @dask_property
     def get_parents(self):
@@ -282,7 +152,7 @@ class MCParticle(MomentumCandidate, base.NanoCollection):
         - Needs the presence of Particleidx0 collection
         - The Particleidx0.index contains info about the parents
         """
-        return map_index_to_array(self, self.get_parents_index, axis=2)
+        return self._events().Particle._apply_global_index(self.get_parents_index)
 
     @get_parents.dask
     def get_parents(self, dask_array):
@@ -292,7 +162,9 @@ class MCParticle(MomentumCandidate, base.NanoCollection):
         - Needs the presence of Particleidx0 collection
         - The Particleidx0.index contains info about the parents
         """
-        return map_index_to_array(dask_array, dask_array.get_parents_index, axis=2)
+        return dask_array._events().Particle._apply_global_index(
+            dask_array.get_parents_index
+        )
 
 
 _set_repr_name("MCParticle")
@@ -309,20 +181,56 @@ class ReconstructedParticle(MomentumCandidate, base.NanoCollection):
     """Reconstructed particle"""
 
     def match_collection(self, idx):
-        """Returns matched particles"""
+        """Returns matched particles; pass on an ObjectID array."""
         return self[idx.index]
 
     @dask_property
-    def matched_gen(self):
-        sel = awkward.broadcast_arrays(True, self)[0]
-        index = self._events().MCRecoAssociations.reco_mc_index[:, :, 1]
-        return self._events().Particle[index[sel]]
+    def match_muons(self):
+        """Returns matched muons; drops none values"""
+        m = self._events().ReconstructedParticles._apply_global_index(
+            self.Muonidx0_indexGlobal
+        )
+        return awkward.drop_none(m, behavior=self.behavior)
 
-    @matched_gen.dask
-    def matched_gen(self, dask_array):
-        sel = awkward.broadcast_arrays(True, dask_array)[0]
-        index = dask_array._events().MCRecoAssociations.reco_mc_index[:, :, 1]
-        return dask_array._events().Particle[index[sel]]
+    @match_muons.dask
+    def match_muons(self, dask_array):
+        """Returns matched muons; drops none values"""
+        m = dask_array._events().ReconstructedParticles._apply_global_index(
+            dask_array.Muonidx0_indexGlobal
+        )
+        return awkward.drop_none(m, behavior=self.behavior)
+
+    @dask_property
+    def match_electrons(self):
+        """Returns matched electrons; drops none values"""
+        e = self._events().ReconstructedParticles._apply_global_index(
+            self.Electronidx0_indexGlobal
+        )
+        return awkward.drop_none(e, behavior=self.behavior)
+
+    @match_electrons.dask
+    def match_electrons(self, dask_array):
+        """Returns matched electrons; drops none values"""
+        e = dask_array._events().ReconstructedParticles._apply_global_index(
+            dask_array.Electronidx0_indexGlobal
+        )
+        return awkward.drop_none(e, behavior=self.behavior)
+
+    @dask_property
+    def match_gen(self):
+        """Returns the Gen level (MC) particle corresponding to the ReconstructedParticle"""
+        prepared = self._events().Particle[self._events().MCRecoAssociations.mc.index]
+        return prepared._apply_global_index(self.MCRecoAssociationsidx0_indexGlobal)
+
+    @match_gen.dask
+    def match_gen(self, dask_array):
+        """Returns the Gen level (MC) particle corresponding to the ReconstructedParticle"""
+        prepared = dask_array._events().Particle[
+            dask_array._events().MCRecoAssociations.mc.index
+        ]
+        return prepared._apply_global_index(
+            dask_array.MCRecoAssociationsidx0_indexGlobal
+        )
 
 
 _set_repr_name("ReconstructedParticle")
@@ -337,7 +245,7 @@ ReconstructedParticleArray.MomentumClass = vector.LorentzVectorArray  # noqa: F8
 
 
 @awkward.mixin_class(behavior)
-class RecoMCParticleLink(base.NanoCollection):
+class MCRecoParticleAssociation(base.NanoCollection):
     """MCRecoParticleAssociation objects."""
 
     @property
@@ -379,12 +287,14 @@ class RecoMCParticleLink(base.NanoCollection):
         return awkward.concatenate((r, m), axis=2)
 
 
-_set_repr_name("RecoMCParticleLink")
+_set_repr_name("MCRecoParticleAssociation")
 
-RecoMCParticleLinkArray.ProjectionClass2D = vector.TwoVectorArray  # noqa: F821
-RecoMCParticleLinkArray.ProjectionClass3D = vector.ThreeVectorArray  # noqa: F821
-RecoMCParticleLinkArray.ProjectionClass4D = RecoMCParticleLinkArray  # noqa: F821
-RecoMCParticleLinkArray.MomentumClass = vector.LorentzVectorArray  # noqa: F821
+MCRecoParticleAssociationArray.ProjectionClass2D = vector.TwoVectorArray  # noqa: F821
+MCRecoParticleAssociationArray.ProjectionClass3D = vector.ThreeVectorArray  # noqa: F821
+MCRecoParticleAssociationArray.ProjectionClass4D = (  # noqa: F821
+    MCRecoParticleAssociationArray  # noqa: F821  # noqa: F821
+)
+MCRecoParticleAssociationArray.MomentumClass = vector.LorentzVectorArray  # noqa: F821
 
 
 @awkward.mixin_class(behavior)
@@ -450,3 +360,174 @@ TrackArray.ProjectionClass2D = vector.TwoVectorArray  # noqa: F821
 TrackArray.ProjectionClass3D = vector.ThreeVectorArray  # noqa: F821
 TrackArray.ProjectionClass4D = TrackArray  # noqa: F821
 TrackArray.MomentumClass = vector.LorentzVectorArray  # noqa: F821
+
+
+###########################################
+# Overloads for FCC_edm4hep1
+###########################################
+
+behavior_edm4hep1 = {}
+behavior_edm4hep1.update(base.behavior)
+behavior_edm4hep1.update(edm4hep.behavior)
+
+
+def _set_repr_name_edm4hep1(classname):
+    def namefcn(self):
+        return classname
+
+    behavior_edm4hep1[classname].__repr__ = namefcn
+
+
+@awkward.mixin_class(behavior_edm4hep1)
+class MCParticle(edm4hep.MCParticle):  # noqa: F811
+    """EDM4HEP Datatype: MCParticle; Modified for FCC"""
+
+    # Get MC Daughters
+    @dask_property
+    def get_daughters(self):
+        return self.Map_Relation("daughters", "Particle")
+
+    @get_daughters.dask
+    def get_daughters(self, dask_array):
+        return dask_array.Map_Relation("daughters", "Particle")
+
+    # Get MC Parents
+    @dask_property
+    def get_parents(self):
+        return self.Map_Relation("parents", "Particle")
+
+    @get_parents.dask
+    def get_parents(self, dask_array):
+        return dask_array.Map_Relation("parents", "Particle")
+
+
+_set_repr_name_edm4hep1("MCParticle")
+behavior_edm4hep1.update(
+    awkward._util.copy_behaviors(MomentumCandidate, MCParticle, behavior)
+)
+MCParticleArray.ProjectionClass2D = vector.TwoVectorArray  # noqa: F821
+MCParticleArray.ProjectionClass3D = vector.ThreeVectorArray  # noqa: F821
+MCParticleArray.ProjectionClass4D = MCParticleArray  # noqa: F821
+MCParticleArray.MomentumClass = vector.LorentzVectorArray  # noqa: F821
+
+
+@awkward.mixin_class(behavior_edm4hep1)
+class ReconstructedParticle(edm4hep.ReconstructedParticle):  # noqa: F811
+    """EDM4HEP Datatype: Reconstructed particle; Modified for FCC"""
+
+    # Get MC counterpart
+    @dask_property
+    def match_gen(self):
+        return self.Map_Link("to", "Particle")
+
+    @match_gen.dask
+    def match_gen(self, dask_array):
+        return dask_array.Map_Link("to", "Particle")
+
+    # Get cluster EFlowPhoton
+    @dask_property
+    def get_cluster_photons(self):
+        return self.Map_Relation("clusters", "EFlowPhoton")
+
+    @get_cluster_photons.dask
+    def get_cluster_photons(self, dask_array):
+        return dask_array.Map_Relation("clusters", "EFlowPhoton")
+
+    # Get ReconstructedParticle
+    @dask_property
+    def get_reconstructedparticles(self):
+        return self.Map_Relation("particles", "ReconstructedParticles")
+
+    @get_reconstructedparticles.dask
+    def get_reconstructedparticles(self, dask_array):
+        return dask_array.Map_Relation("particles", "ReconstructedParticles")
+
+    # Get Tracks
+    @dask_property
+    def get_tracks(self):
+        return self.Map_Relation("tracks", "EFlowTrack")
+
+    @get_tracks.dask
+    def get_tracks(self, dask_array):
+        return dask_array.Map_Relation("tracks", "EFlowTrack")
+
+
+_set_repr_name_edm4hep1("ReconstructedParticle")
+behavior_edm4hep1.update(
+    awkward._util.copy_behaviors(
+        MomentumCandidate, ReconstructedParticle, behavior_edm4hep1
+    )
+)
+ReconstructedParticleArray.ProjectionClass2D = vector.TwoVectorArray  # noqa: F821
+ReconstructedParticleArray.ProjectionClass3D = vector.ThreeVectorArray  # noqa: F821
+ReconstructedParticleArray.ProjectionClass4D = ReconstructedParticleArray  # noqa: F821
+ReconstructedParticleArray.MomentumClass = vector.LorentzVectorArray  # noqa: F821
+
+
+@awkward.mixin_class(behavior_edm4hep1)
+class ParticleID(edm4hep.ParticleID):  # noqa: F811
+    """EDM4HEP Datatype: ParticleID; Modified for FCC"""
+
+    # Get ReconstructedParticle
+    @dask_property
+    def get_reconstructedparticles(self):
+        return self.Map_Relation("particle", "ReconstructedParticles")
+
+    @get_reconstructedparticles.dask
+    def get_reconstructedparticles(self, dask_array):
+        return dask_array.Map_Relation("particle", "ReconstructedParticles")
+
+
+_set_repr_name_edm4hep1("ParticleID")
+
+
+@awkward.mixin_class(behavior_edm4hep1)
+class Cluster(edm4hep.Cluster):  # noqa: F811
+    """EDM4HEP Datatype: Cluster; Modified for FCC"""
+
+    # Get cluster EFlowPhoton
+    @dask_property
+    def get_cluster_photons(self):
+        return self.Map_Relation("clusters", "EFlowPhoton")
+
+    @get_cluster_photons.dask
+    def get_cluster_photons(self, dask_array):
+        return dask_array.Map_Relation("clusters", "EFlowPhoton")
+
+    # Get calorimeter hits
+    @dask_property
+    def get_hits(self):
+        return self.Map_Relation("hits", "CalorimeterHits")
+
+    @get_hits.dask
+    def get_hits(self, dask_array):
+        return dask_array.Map_Relation("hits", "CalorimeterHits")
+
+
+_set_repr_name_edm4hep1("Cluster")
+
+
+@awkward.mixin_class(behavior_edm4hep1)
+class Track(edm4hep.Track):  # noqa: F811
+    """EDM4HEP Datatype: Track; Modified for FCC"""
+
+    # Get Tracks
+    @dask_property
+    def get_tracks(self):
+        return self.Map_Relation("tracks", "EFlowTrack")
+
+    @get_tracks.dask
+    def get_tracks(self, dask_array):
+        return dask_array.Map_Relation("tracks", "EFlowTrack")
+
+    # Get tracker hits
+    @dask_property
+    def get_trackerhits(self):
+        return self.Map_Relation("trackerHits", "TrackerHits")
+
+    @get_trackerhits.dask
+    def get_trackerhits(self, dask_array):
+        return dask_array.Map_Relation("trackerHits", "TrackerHits")
+
+
+_set_repr_name_edm4hep1("Track")

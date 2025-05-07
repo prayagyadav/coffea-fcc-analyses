@@ -20,7 +20,7 @@ from scripts.analyzers import ReconstructedParticle as ReconstructedParticleUtil
 from scripts.analyzers import Jet as JetUtil
 from scripts.plugins.fastjet import Recombiner
 
-E0_Scheme = Recombiner.E0_scheme.instance()
+E0_Scheme = Recombiner.E0_Scheme.instance()
 
 plot_props = pd.DataFrame(plots)
 
