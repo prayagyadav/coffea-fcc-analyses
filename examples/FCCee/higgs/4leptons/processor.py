@@ -28,64 +28,10 @@ def get_1Dhist(name, var, flatten=False):
     var = var[~dak.is_none(var, axis=0)] # Remove None values only
     return hda.Hist.new.Reg(props.bins, props.xmin, props.xmax).Double().fill(var)
 
-def get(events,collection,attribute,*cut):
-    '''
-    Get an attribute from a branch with or without a base cut.
-    '''
-    if len(cut) != 0:
-        return events[collection+'/'+collection+'.'+attribute][cut[0]]
-    return events[collection+'/'+collection+'.'+attribute]
-
-def get_all(events,Collection,*basecut):
-    '''
-    Collect all the attributes of a collection into a namedtuple named particle, with or without a base cut
-    '''
-    prefix = '/'.join([Collection]*2)+'.'
-    list_of_attr = [field.replace(prefix,'') for field in events.fields if field.startswith(prefix)]
-    replace_list = ['.','[',']']
-    valid_attr = list_of_attr
-    for rep in replace_list:
-        valid_attr = [field.replace(rep, '_') for field in valid_attr ]
-    part = namedtuple('particle', valid_attr)
-    return part(*[get(events,Collection,attr,*basecut) for attr in list_of_attr])
-
-def get_reco(Reconstr_branch, needed_particle, events):
-    '''
-    Match the Reconstructed collection to the desired particle collection.
-    '''
-    part = namedtuple('particle', list(Reconstr_branch._fields))
-    return part(*[getattr(Reconstr_branch,attr)[get(events,needed_particle,'index')] for attr in Reconstr_branch._fields])
-
-def Reso_builder(lepton, resonance):
-    '''
-    Builds Resonance candidates
-    Input:    lepton(var*[var*LorentzVector]),
-              resonance(float)
-    Output: Reso([var*LorentzVecctor]) best resonance candidate in each event (maximum one per event)
-    '''
-    #Create all the combinations
-    combs = dak.combinations(lepton,2)
-    # Get dileptons
-    lep1 , lep2 = dak.unzip(combs)
-    di_lep = lep1 + lep2 # This process drops any other field except 4 momentum fields
-
-    di_lep = ak.zip({"px":di_lep.px,"py":di_lep.py,"pz":di_lep.pz,"E":di_lep.E,"q":lep1.q + lep2.q,}, with_name="Momentum4D")
-
-    # Sort by closest mass to the resonance value
-    sort_mask = dak.argsort(abs(resonance-di_lep.mass), axis=1)
-    Reso = di_lep[sort_mask]
-
-    #Choose the best candidate
-    Reso = dak.fill_none(Reso,[],axis=0) #Transform the None values at axis 0 to [], so that they survive the next operation
-    Reso = dak.firsts(Reso) #Chooses the first elements and flattens out, [] gets converted to None
-
-    return Reso
-
-
 #################################
 #Begin the processor definition #
 #################################
-class example_processor(processor.ProcessorABC):
+class 4leptons(processor.ProcessorABC):
     '''
     Processor: Define actual calculations here
     '''
@@ -121,11 +67,21 @@ class example_processor(processor.ProcessorABC):
         Output = {
             'histograms': {
                 'sel0':{name:get_1Dhist(name,var,flatten=True) for name,var in zip(names,vars_sel0)},
-                'sel1':{name:get_1Dhist(name,var,flatten=True) for name,var in zip(names,vars_sel1)}
+                'sel1':{name:get_1Dhist(name,var,flatten=True) for name,var in zip(names,vars_sel1)},
+                'sel2':{name:get_1Dhist(name,var,flatten=True) for name,var in zip(names,vars_sel2)},
+                'sel3':{name:get_1Dhist(name,var,flatten=True) for name,var in zip(names,vars_sel3)},
+                'sel4':{name:get_1Dhist(name,var,flatten=True) for name,var in zip(names,vars_sel4)},
+                'sel5':{name:get_1Dhist(name,var,flatten=True) for name,var in zip(names,vars_sel5)},
+                'sel6':{name:get_1Dhist(name,var,flatten=True) for name,var in zip(names,vars_sel6)},
             },
             'cutflow': {
                 'sel0': {'Onecut':sel0_ocl[0],'Cutflow':sel0_ocl[1],'Labels':sel0_ocl[2]},
                 'sel1': {'Onecut':sel1_ocl[0],'Cutflow':sel1_ocl[1],'Labels':sel1_ocl[2]}
+                'sel2': {'Onecut':sel1_ocl[0],'Cutflow':sel1_ocl[1],'Labels':sel2_ocl[2]}
+                'sel3': {'Onecut':sel1_ocl[0],'Cutflow':sel1_ocl[1],'Labels':sel3_ocl[2]}
+                'sel4': {'Onecut':sel1_ocl[0],'Cutflow':sel1_ocl[1],'Labels':sel4_ocl[2]}
+                'sel5': {'Onecut':sel1_ocl[0],'Cutflow':sel1_ocl[1],'Labels':sel5_ocl[2]}
+                'sel6': {'Onecut':sel1_ocl[0],'Cutflow':sel1_ocl[1],'Labels':sel6_ocl[2]}
             }
         }
         return Output
