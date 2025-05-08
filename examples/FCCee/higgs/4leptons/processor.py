@@ -31,7 +31,7 @@ def get_1Dhist(name, var, flatten=False):
 #################################
 #Begin the processor definition #
 #################################
-class 4leptons(processor.ProcessorABC):
+class Fourleptons(processor.ProcessorABC):
     '''
     Processor: Define actual calculations here
     '''
@@ -42,46 +42,68 @@ class 4leptons(processor.ProcessorABC):
 
         #Create a Packed Selection object to get a cutflow later
         cut = PackedSelection()
-        cut.add('No cut', dak.ones_like(dak.num(get(events,'ReconstructedParticles','energy'),axis=1),dtype=bool))
 
-        # Selection 0 : No Cut (example)
-        sel0_ocl = cut.cutflow(*cut.names).yieldhist()
-        sel0_events = events
+        # Main calculations
+        E = events.ReconstructedParticles.E
 
-        # Filter out any event with no reconstructed particles and generate Reconstructed Particle Attributes
-        #ak.mask preserves array length
-        at_least_one_recon = dak.num(get(events,'ReconstructedParticles','energy'), axis=1) > 0
-        good_events = dak.mask(events,at_least_one_recon)
-        cut.add('At least one Reco Particle', at_least_one_recon)
+        # Define individual cuts
+        cut.add('No cut', ak.all(E > 0, axis=1))
+        cut.add('cut1', ak.all(E < 100, axis=1))
+        cut.add('cut2', ak.all(E < 90, axis=1))
+        cut.add('cut3', ak.all(E < 80, axis=1))
+        cut.add('cut4', ak.all(E < 70, axis=1))
+        cut.add('cut5', ak.all(E < 60, axis=1))
+        cut.add('cut6', ak.all(E < 50, axis=1))
+        
 
-        # Selection 1 : No Cut and At least one Reco Particle
-        sel1_ocl = cut.cutflow(*cut.names).yieldhist()
-        sel1_events = good_events
+        # Selections: A collection of cuts
+        sel = {}
+        sel[0] = ['No cut']
+        sel[1] = ['No cut','cut1']
+        sel[2] = ['No cut','cut1','cut2']
+        sel[3] = ['No cut','cut1','cut2','cut3']
+        sel[4] = ['No cut','cut1','cut2','cut3','cut4']
+        sel[5] = ['No cut','cut1','cut2','cut3','cut4','cut5']
+        sel[6] = ['No cut','cut1','cut2','cut3','cut4','cut5','cut6']
+
+        # Get cutflow hists
+        sel_ocl = {key:cut.cutflow(*val).yieldhist() for key,val in sel.items()}
+        
+        # Apply the selection to the relevant variables
+        vars_sel = {}
+        for key,selections in sel.items():
+            vars_sel[key] = {
+                'selectedmuons_p':E[cut.all(*selections)],
+                'fourmuons_mass':E[cut.all(*selections)],
+                'fourmuons_pmin':E[cut.all(*selections)],
+                'Z_res_mass':E[cut.all(*selections)],
+                'Z_non_res_mass':E[cut.all(*selections)],
+                'vis_e_woMuons':E[cut.all(*selections)],
+                'iso_least_isolated_muon':E[cut.all(*selections)],
+                'missing_p':E[cut.all(*selections)],
+                'cos_theta_miss':E[cut.all(*selections)],
+            }
+        
 
         #Prepare output
-        #Choose the required histograms and their assigned variables to fill
-        names = plot_props.columns.to_list()
-        vars_sel0 = [get(sel0_events,'ReconstructedParticles','energy')]
-        vars_sel1 = [get(sel1_events,'ReconstructedParticles','energy')]
-
         Output = {
             'histograms': {
-                'sel0':{name:get_1Dhist(name,var,flatten=True) for name,var in zip(names,vars_sel0)},
-                'sel1':{name:get_1Dhist(name,var,flatten=True) for name,var in zip(names,vars_sel1)},
-                'sel2':{name:get_1Dhist(name,var,flatten=True) for name,var in zip(names,vars_sel2)},
-                'sel3':{name:get_1Dhist(name,var,flatten=True) for name,var in zip(names,vars_sel3)},
-                'sel4':{name:get_1Dhist(name,var,flatten=True) for name,var in zip(names,vars_sel4)},
-                'sel5':{name:get_1Dhist(name,var,flatten=True) for name,var in zip(names,vars_sel5)},
-                'sel6':{name:get_1Dhist(name,var,flatten=True) for name,var in zip(names,vars_sel6)},
+                'sel0':{name:get_1Dhist(name,var,flatten=True) for name,var in vars_sel[0].items()},
+                'sel1':{name:get_1Dhist(name,var,flatten=True) for name,var in vars_sel[1].items()},
+                'sel2':{name:get_1Dhist(name,var,flatten=True) for name,var in vars_sel[2].items()},
+                'sel3':{name:get_1Dhist(name,var,flatten=True) for name,var in vars_sel[3].items()},
+                'sel4':{name:get_1Dhist(name,var,flatten=True) for name,var in vars_sel[4].items()},
+                'sel5':{name:get_1Dhist(name,var,flatten=True) for name,var in vars_sel[5].items()},
+                'sel6':{name:get_1Dhist(name,var,flatten=True) for name,var in vars_sel[6].items()},
             },
             'cutflow': {
-                'sel0': {'Onecut':sel0_ocl[0],'Cutflow':sel0_ocl[1],'Labels':sel0_ocl[2]},
-                'sel1': {'Onecut':sel1_ocl[0],'Cutflow':sel1_ocl[1],'Labels':sel1_ocl[2]}
-                'sel2': {'Onecut':sel1_ocl[0],'Cutflow':sel1_ocl[1],'Labels':sel2_ocl[2]}
-                'sel3': {'Onecut':sel1_ocl[0],'Cutflow':sel1_ocl[1],'Labels':sel3_ocl[2]}
-                'sel4': {'Onecut':sel1_ocl[0],'Cutflow':sel1_ocl[1],'Labels':sel4_ocl[2]}
-                'sel5': {'Onecut':sel1_ocl[0],'Cutflow':sel1_ocl[1],'Labels':sel5_ocl[2]}
-                'sel6': {'Onecut':sel1_ocl[0],'Cutflow':sel1_ocl[1],'Labels':sel6_ocl[2]}
+                'sel0': {'Onecut':sel_ocl[0][0],'Cutflow':sel_ocl[0][1],'Labels':sel_ocl[0][2]},
+                'sel1': {'Onecut':sel_ocl[1][0],'Cutflow':sel_ocl[1][1],'Labels':sel_ocl[1][2]},
+                'sel2': {'Onecut':sel_ocl[2][0],'Cutflow':sel_ocl[2][1],'Labels':sel_ocl[2][2]},
+                'sel3': {'Onecut':sel_ocl[3][0],'Cutflow':sel_ocl[3][1],'Labels':sel_ocl[3][2]},
+                'sel4': {'Onecut':sel_ocl[4][0],'Cutflow':sel_ocl[4][1],'Labels':sel_ocl[4][2]},
+                'sel5': {'Onecut':sel_ocl[5][0],'Cutflow':sel_ocl[5][1],'Labels':sel_ocl[5][2]},
+                'sel6': {'Onecut':sel_ocl[6][0],'Cutflow':sel_ocl[6][1],'Labels':sel_ocl[6][2]},
             }
         }
         return Output
