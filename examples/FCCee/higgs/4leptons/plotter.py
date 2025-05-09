@@ -100,11 +100,11 @@ def yield_plot(name, title, keys, scaled, unscaled, formats, path, plot_width=8,
             raw_text = str(round(obs[i]['Cutflow'].values()[0],2))
             percentage = str(round(obs[i]['Cutflow'].values()[-1]*100/obs[i]['Cutflow'].values()[0],2))
             level -= linespacing*table_scale
-            ax.text(0.02, level, list(keys)[i], fontsize=10*table_scale, color=color,horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-            ax.text(0.30, level, Type, color=color, fontsize=12*table_scale, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-            ax.text(0.49, level, raw_text, color=color, fontsize=12*table_scale, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-            ax.text(0.68, level, yield_text, color=color, fontsize=12*table_scale, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-            ax.text(0.87, level, percentage, color=color, fontsize=12*table_scale, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+            ax.text(0.02, level, list(keys)[i], fontsize=int(10*table_scale), color=color,horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+            ax.text(0.30, level, Type, color=color, fontsize=int(12*table_scale), horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+            ax.text(0.49, level, raw_text, color=color, fontsize=int(12*table_scale), horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+            ax.text(0.68, level, yield_text, color=color, fontsize=int(12*table_scale), horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+            ax.text(0.87, level, percentage, color=color, fontsize=int(12*table_scale), horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
         level -= 2*linespacing
 
     ax.set_title(title,pad=25,  fontsize= "15", color="#192655")
