@@ -131,4 +131,4 @@ energy         = ecm #in GeV
 collider       = 'FCC-ee'
 
 # Extra cosmetics
-yeild_table_scale = 0.7 # reduce font sizes in yield table by this factor, so that they fit in the figure area
+yield_table_scale = 0.7 # reduce font sizes in yield table by this factor, so that they fit in the figure area

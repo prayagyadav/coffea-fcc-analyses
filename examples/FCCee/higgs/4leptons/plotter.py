@@ -84,6 +84,7 @@ def yield_plot(name, title, keys, scaled, unscaled, formats, path, plot_width=8,
 
     
     table_scale = getattr(config, "yield_table_scale", 1)
+    print("table_scale", table_scale)
     level, linespacing = 0.72, 0.05
     for scale,obs in zip(['UNSCALED','SCALED'],[unscaled,scaled]):
         ax.text(0.02, level, scale, weight='bold', fontsize=int(13*table_scale), horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
