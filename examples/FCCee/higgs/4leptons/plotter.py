@@ -83,7 +83,7 @@ def yield_plot(name, title, keys, scaled, unscaled, formats, path, plot_width=8,
     ax.text(0.10, 0.74, '$L = '+str(intLumi/1e6)+' ab^{-1}$', fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
 
     level, linespacing = 0.60, 0.05
-    table_scale = 0.1
+    table_scale = 0.5
     for scale,obs in zip(['UNSCALED','SCALED'],[unscaled,scaled]):
         ax.text(0.02, level, scale, weight='bold', fontsize=13, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
         level -= linespacing
