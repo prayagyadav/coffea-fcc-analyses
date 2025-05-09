@@ -62,15 +62,15 @@ plots = {
     'selectedmuons_p':{'name':'selected_muons_p','title':'$\\mu_p$ [GeV]','xlabel':'$p_T$ [GeV]','ylabel':'Events','bins':250,'xmin':0,'xmax':250},
 
     'fourmuons_mass':{'name':'fourMuons_mass','title':'$M_{4\\mu}$ [GeV]','xlabel':'$Mass$ [GeV]','ylabel':'Events','bins':50,'xmin':0,'xmax':250},
-    'fourmuons_pmin':{'name':'fourMuons_pmin','title':'$(P_{4\\mu})_{min}$ [GeV]','xlabel':'$p_T$ [GeV]','ylabel':'Events','bins':20,'xmin':0,'xmax':100},
+    'fourmuons_pmin':{'name':'fourMuons_pmin','title':'$(P_{4\\mu})_{min}$ [GeV]','xlabel':'$p_{min}$ [GeV]','ylabel':'Events','bins':20,'xmin':0,'xmax':100},
 
     'Z_res_mass':{'name':'zll_mass','title':'On-shell $M_{\\mu\\mu}$ [GeV]','xlabel':'$Mass$ [GeV]','ylabel':'Events','bins':50,'xmin':0,'xmax':250},
     'Z_non_res_mass':{'name':'non_res_Z_m','title':'Off-shell $M_{\\mu\\mu}$ [GeV]','xlabel':'$Mass$ [GeV]','ylabel':'Events','bins':50,'xmin':0,'xmax':250},
 
     'vis_e_woMuons':{'name':'vis_e_other_particles','title':'Visible Energy excluding muons [GeV]','xlabel':'$E$ [GeV]','ylabel':'Events','bins':50,'xmin':0,'xmax':250},
     'iso_least_isolated_muon':{'name':'fourMuons_min_iso','title':'iso(least isolated muon)','xlabel':'iso','ylabel':'Events','bins':50,'xmin':0,'xmax':20},
-    'missing_p':{'name':'pmiss','title':'missing p [GeV]','xlabel':'$p^{miss}_T$ [GeV]','ylabel':'Events','bins':50,'xmin':0,'xmax':250},
-    'cos_theta_miss':{'name':'cosTheta_miss','title':'Cos(Theta_miss)','xlabel':'$cos^{miss}\\theta$','ylabel':'Events','bins':100,'xmin':0,'xmax':1},
+    'missing_p':{'name':'pmiss','title':'missing p [GeV]','xlabel':'$p^{miss}$ [GeV]','ylabel':'Events','bins':50,'xmin':0,'xmax':250},
+    'cos_theta_miss':{'name':'cosTheta_miss','title':'Cos(Theta_miss)','xlabel':'$cos_{miss}\\theta$','ylabel':'Events','bins':100,'xmin':0,'xmax':1},
 
 }
 

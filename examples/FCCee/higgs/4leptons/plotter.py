@@ -307,11 +307,6 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
                         linewidth=1,
                         ax=ax
                     )
-                    #handles, labels = ax.get_legend_handles_labels()
-                    #if getattr(config, "Reverse_legend_labels", False):
-                    #    handles = reversed(handles)
-                    #    labels = reversed(labels)
-                    #fig.legend(handles, labels, prop={"size":10},loc= getattr(config, "legend_location", (0.74,0.74)) )
                     fig.legend(prop={"size":10},loc= getattr(config, "legend_location", (0.74,0.74)), reverse=getattr(config, "Reverse_legend_labels", False) )
 
                     if log_mode :
