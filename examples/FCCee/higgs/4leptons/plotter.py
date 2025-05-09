@@ -73,6 +73,8 @@ def yield_plot(name, title, keys, scaled, unscaled, formats, path, plot_width=8,
     '''
 
     fig, ax = plt.subplots(figsize=(plot_width,plot_height))
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
     ax.text(0.25, 1.02, 'FCC Analyses: FCC-ee Simulation (Delphes)', fontsize=10, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
     ax.text(0.92, 1.02, '$\\sqrt{s} = '+str(energy)+' GeV$', fontsize=10, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
     ax.text(0.10, 0.95, collider, fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
@@ -97,7 +99,7 @@ def yield_plot(name, title, keys, scaled, unscaled, formats, path, plot_width=8,
             raw_text = str(round(obs[i]['Cutflow'].values()[0],2))
             percentage = str(round(obs[i]['Cutflow'].values()[-1]*100/obs[i]['Cutflow'].values()[0],2))
             level -= linespacing
-            ax.text(0.02, level, datasets, fontsize=10, color=color,horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+            ax.text(0.02, level, list(keys)[i], fontsize=10, color=color,horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
             ax.text(0.30, level, Type, color=color,fontsize=12, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
             ax.text(0.49, level, raw_text, color=color, fontsize=12, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
             ax.text(0.68, level, yield_text, color=color, fontsize=12, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
