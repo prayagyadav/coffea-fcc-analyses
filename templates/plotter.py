@@ -3,13 +3,13 @@ import  collections, argparse, hist, copy, glob, os, re
 from matplotlib.ticker import MultipleLocator, AutoMinorLocator
 from coffea.util import load
 from pandas.core.indexes.base import Level
-from config import *
+import config
 
 ##################################
 # Definition of useful functions #
 ##################################
 
-plot_props = pd.DataFrame(plots)
+plot_props = pd.DataFrame(config.plots)
 
 def get_subdict(dicts, key):
     '''
@@ -60,7 +60,7 @@ def get_xsec_scale(dataset, raw_events, Luminosity):
     '''
     Get final scale factor from cross section
     '''
-    xsec = cross_sections[dataset] #in per picobarn
+    xsec = config.cross_sections[dataset] #in per picobarn
     if raw_events > 0:
         sf = (xsec*Luminosity)/raw_events
     else :
@@ -73,36 +73,41 @@ def yield_plot(name, title, keys, scaled, unscaled, formats, path, plot_width=8,
     '''
 
     fig, ax = plt.subplots(figsize=(plot_width,plot_height))
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
     ax.text(0.25, 1.02, 'FCC Analyses: FCC-ee Simulation (Delphes)', fontsize=10, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
-    ax.text(0.92, 1.02, '$\\sqrt{s} = '+str(energy)+' GeV$', fontsize=10, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
-    ax.text(0.10, 0.95, collider, fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-    ax.text(0.10, 0.88,'Delphes Version: '+ delphesVersion, fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-    ax.text(0.10, 0.81, 'Signal : $'+ana_tex+'$', fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-    ax.text(0.10, 0.74, '$L = '+str(intLumi/1e6)+' ab^{-1}$', fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+    ax.text(0.92, 1.02, '$\\sqrt{s} = '+str(config.energy)+' GeV$', fontsize=10, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
+    ax.text(0.10, 0.95, config.collider, fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+    ax.text(0.10, 0.88,'Delphes Version: '+ config.delphesVersion, fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+    ax.text(0.10, 0.81, 'Signal : $'+config.ana_tex+'$', fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+    ax.text(0.10, 0.74, '$L = '+str(config.intLumi/1e6)+' ab^{-1}$', fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
 
-    level, linespacing = 0.60, 0.05
+    
+    table_scale = getattr(config, "yield_table_scale", 1)
+    print("table_scale", table_scale)
+    level, linespacing = 0.72, 0.05
     for scale,obs in zip(['UNSCALED','SCALED'],[unscaled,scaled]):
-        ax.text(0.02, level, scale, weight='bold', fontsize=13, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-        level -= linespacing
-        ax.text(0.02, level, 'Sample', weight='bold', fontsize=12, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-        ax.text(0.30, level, 'Type', weight='bold', fontsize=12, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-        ax.text(0.49, level, 'Raw', weight='bold', fontsize=12, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-        ax.text(0.68, level, 'Yield', weight='bold', fontsize=12, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-        ax.text(0.87, level, 'Yield %', weight='bold', fontsize=12, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+        ax.text(0.02, level, scale, weight='bold', fontsize=int(13*table_scale), horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+        level -= linespacing*table_scale
+        ax.text(0.02, level, 'Sample', weight='bold', fontsize=int(12*table_scale), horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+        ax.text(0.30, level, 'Type', weight='bold', fontsize=int(12*table_scale), horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+        ax.text(0.49, level, 'Raw', weight='bold', fontsize=int(12*table_scale), horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+        ax.text(0.68, level, 'Yield', weight='bold', fontsize=int(12*table_scale), horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+        ax.text(0.87, level, 'Yield %', weight='bold', fontsize=int(12*table_scale), horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
         for i in range(len(keys)):
-            datasets = req_hists[list(keys)[i]]['datasets']
-            Type = req_hists[list(keys)[i]]['type']
-            color = req_hists[list(keys)[i]]['color']
+            datasets = config.req_hists[list(keys)[i]]['datasets']
+            Type = config.req_hists[list(keys)[i]]['type']
+            color = config.req_hists[list(keys)[i]]['color']
             yield_text = str(round(obs[i]['Cutflow'].values()[-1],2))
             raw_text = str(round(obs[i]['Cutflow'].values()[0],2))
             percentage = str(round(obs[i]['Cutflow'].values()[-1]*100/obs[i]['Cutflow'].values()[0],2))
-            level -= linespacing
-            ax.text(0.02, level, datasets, fontsize=10, color=color,horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-            ax.text(0.30, level, Type, color=color,fontsize=12, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-            ax.text(0.49, level, raw_text, color=color, fontsize=12, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-            ax.text(0.68, level, yield_text, color=color, fontsize=12, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-            ax.text(0.87, level, percentage, color=color, fontsize=12, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
-        level -= 2*linespacing
+            level -= linespacing*table_scale
+            ax.text(0.02, level, list(keys)[i], fontsize=int(10*table_scale), color=color,horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+            ax.text(0.30, level, Type, color=color, fontsize=int(12*table_scale), horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+            ax.text(0.49, level, raw_text, color=color, fontsize=int(12*table_scale), horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+            ax.text(0.68, level, yield_text, color=color, fontsize=int(12*table_scale), horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+            ax.text(0.87, level, percentage, color=color, fontsize=int(12*table_scale), horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
+        level -= 2*linespacing*table_scale
 
     ax.set_title(title,pad=25,  fontsize= "15", color="#192655")
     for format in formats :
@@ -119,7 +124,7 @@ def cuts_table(name, title, labels, formats, path):
 
     fig, ax = plt.subplots(figsize=(8,8))
     ax.text(0.25, 1.02, 'FCC Analyses: FCC-ee Simulation (Delphes)', fontsize=10, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
-    ax.text(0.92, 1.02, '$\\sqrt{s} = '+str(energy)+' GeV$', fontsize=10, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
+    ax.text(0.92, 1.02, '$\\sqrt{s} = '+str(config.energy)+' GeV$', fontsize=10, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
 
     level, linespacing = 0.90, 0.05
     ax.text(0.02, level, 'Cut Order', weight='bold', fontsize=12, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
@@ -173,7 +178,7 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
                     cutflow_values = cutflow_hist.values()
                     Raw_Events_signal = cutflow_values[0]
                     print(f'-->RawEvents for {i}: {Raw_Events_signal}')
-                    xsec_scale_factor = get_xsec_scale(i, Raw_Events_signal, intLumi)
+                    xsec_scale_factor = get_xsec_scale(i, Raw_Events_signal, config.intLumi)
                     print(f'-->xsec_scale for {i} = {xsec_scale_factor}')
                     Hist_signal = input_dict[i]['histograms'][sel]
                     scaled_hist_signal = { name: xsec_scale_factor*hist for name, hist in Hist_signal.items()}
@@ -200,7 +205,7 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
                     cutflow_values = cutflow_hist.values()
                     Raw_Events = cutflow_values[0]
                     print(f'-->RawEvents for {i}: {Raw_Events}')
-                    xsec_scale_factor = get_xsec_scale(i, Raw_Events, intLumi)
+                    xsec_scale_factor = get_xsec_scale(i, Raw_Events, config.intLumi)
                     print(f'-->xsec_scale for {i} = {xsec_scale_factor}')
                     Hist = input_dict[i]['histograms'][sel]
                     scaled_hist = { name: xsec_scale_factor*hist for name, hist in Hist.items()}
@@ -289,7 +294,7 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
                     )
                     #Signal
                     if stack_mode and n_bkgs != 0:
-                        sigl_hist = sum(hist_signal)+sum(hist) #Manual stacking because independent stacking is not supported in mplhep
+                        sigl_hist = [h+sum(hist) for h in hist_signal] #Manual stacking because independent stacking is not supported in mplhep
                     else :
                         sigl_hist = hist_signal
 
@@ -302,7 +307,7 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
                         linewidth=1,
                         ax=ax
                     )
-                    fig.legend(prop={"size":10},loc= (0.74,0.74) )
+                    fig.legend(prop={"size":10},loc= getattr(config, "legend_location", (0.74,0.74)), reverse=getattr(config, "Reverse_legend_labels", False) )
 
                     if log_mode :
                         log_mode_text = 'log'
@@ -342,8 +347,8 @@ def makeplot(fig, ax, hist, name, title, label, xlabel, ylabel, bins, xmin, xmax
             ax=ax
         )
 
-    ax.text(0.27, 1.02, 'FCC Analyses: FCC-ee Simulation (Delphes)', fontsize=9, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
-    ax.text(0.92, 1.02, f'$\\sqrt{{s}} = {energy} GeV$', fontsize=9, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
+    ax.text(*getattr(config, "FCC_text_location", (0.27, 1.02,)), 'FCC Analyses: FCC-ee Simulation (Delphes)', fontsize=9, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
+    ax.text(*getattr(config, "sqrt_s_text_location", (0.92, 1.02)), f'$\\sqrt{{s}} = {config.energy} GeV$', fontsize=9, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
 
     if  cutflow_mode:
         ax.set_ylabel(ylabel)
@@ -372,7 +377,7 @@ parser.add_argument(
     "-i",
     "--input",
     help="Enter the input directory where the coffea files are saved",
-    default=input_path,
+    default=config.input_path,
     type=str
 )
 inputs = parser.parse_args()
@@ -383,7 +388,7 @@ inputs = parser.parse_args()
 #########################
 #Input configuration
 input_path = inputs.input+"/"
-base_filename = output_filename+".coffea"
+base_filename = config.output_filename+".coffea"
 print(f'Current configuration:\n\tinput_path:\t{input_path}\n\tbase_filename:\t{base_filename}\n')
 print("Loading coffea files...")
 
@@ -425,7 +430,7 @@ else :
 # Plot the histograms #
 #######################
 print("Plotting...")
-if not os.path.exists(plot_path):
-    os.makedirs(plot_path)
+if not os.path.exists(config.plot_path):
+    os.makedirs(config.plot_path)
 
-generate_plots(input, req_hists, req_plots, selections, stack, log, formats, plot_path, plot_props)
+generate_plots(input, config.req_hists, config.req_plots, config.selections, config.stack, config.log, config.formats, config.plot_path, plot_props)
