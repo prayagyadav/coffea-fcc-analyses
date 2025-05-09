@@ -307,7 +307,7 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
                         linewidth=1,
                         ax=ax
                     )
-                    fig.legend(prop={"size":10},loc= (0.74,0.74) )
+                    fig.legend(prop={"size":10},loc= getattr(config, "legend_location", (0.74,0.74)) )
 
                     if log_mode :
                         log_mode_text = 'log'
