@@ -347,8 +347,8 @@ def makeplot(fig, ax, hist, name, title, label, xlabel, ylabel, bins, xmin, xmax
             ax=ax
         )
 
-    ax.text(0.27, 1.02, 'FCC Analyses: FCC-ee Simulation (Delphes)', fontsize=9, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
-    ax.text(0.92, 1.02, f'$\\sqrt{{s}} = {config.energy} GeV$', fontsize=9, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
+    ax.text(*getattr(config, "FCC_text_location", (0.27, 1.02,)), 'FCC Analyses: FCC-ee Simulation (Delphes)', fontsize=9, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
+    ax.text(*getattr(config, "sqrt_s_text_location", (0.92, 1.02)), f'$\\sqrt{{s}} = {config.energy} GeV$', fontsize=9, horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
 
     if  cutflow_mode:
         ax.set_ylabel(ylabel)
