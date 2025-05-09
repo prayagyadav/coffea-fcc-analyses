@@ -95,7 +95,7 @@ req_plots = ['selectedmuons_p','fourmuons_mass','fourmuons_pmin','Z_res_mass','Z
 req_hists = {
         #Signal
         "qqH_HZZ":{"type":'Signal',"datasets":['wzp6_ee_qqH_HZZ_llll_ecm240'],"color":'red'},
-        "nunuH_HZZ":{"type":'Signal',"datasets":['wzp6_ee_nunuH_HZZ_ecm240'],"color":'orange'},
+#        "nunuH_HZZ":{"type":'Signal',"datasets":['wzp6_ee_nunuH_HZZ_ecm240'],"color":'orange'},
         #Background
         "ZZ":{"type":'Background',"datasets":['p8_ee_ZZ_ecm240'],"color":'blue'},
         "Zqq":{"type":'Background',"datasets":['p8_ee_Zqq_ecm240'],"color":'yellow'},

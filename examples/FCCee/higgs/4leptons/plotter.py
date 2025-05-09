@@ -292,7 +292,7 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
                         sigl_hist = sum(hist_signal)+sum(hist) #Manual stacking because independent stacking is not supported in mplhep
                     else :
                         sigl_hist = hist_signal
-
+                    print(sigl_hist)
                     hep.histplot(
                         sigl_hist,
                         color=color_list_signal,
