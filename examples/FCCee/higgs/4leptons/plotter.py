@@ -82,7 +82,10 @@ def yield_plot(name, title, keys, scaled, unscaled, formats, path, plot_width=8,
     ax.text(0.10, 0.81, 'Signal : $'+ana_tex+'$', fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
     ax.text(0.10, 0.74, '$L = '+str(intLumi/1e6)+' ab^{-1}$', fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
 
-    table_scale = 0.7
+    if yeild_table_scale in locals():
+        table_scale = yield_table_scale
+    else:
+        table_scale = 1
     level, linespacing = 0.72, 0.05
     for scale,obs in zip(['UNSCALED','SCALED'],[unscaled,scaled]):
         ax.text(0.02, level, scale, weight='bold', fontsize=int(13*table_scale), horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
