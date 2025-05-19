@@ -1,6 +1,7 @@
 from coffea import processor
 from coffea.analysis_tools import PackedSelection, Cutflow
 import awkward as ak
+import numpy as np
 import pandas as pd
 import dask_awkward as dak
 import hist.dask as hda
@@ -8,13 +9,16 @@ from collections import namedtuple
 import hist
 import vector
 vector.register_awkward()
-from config import plots
+import config
 import sys
 import os
 local_dir = os.environ['LOCAL_DIR']
 sys.path.append(local_dir)
 
-plot_props = pd.DataFrame(plots)
+from scripts.analyzers.ReconstructedParticle import remove, recoilBuilder
+from functions import *
+
+plot_props = pd.DataFrame(config.plots)
 
 def get_1Dhist(name, var, flatten=False):
     '''
@@ -44,19 +48,78 @@ class Fourleptons(processor.ProcessorABC):
         cut = PackedSelection()
 
         # Main calculations
+        Muons = events.ReconstructedParticles[events.Muonidx0.index]
+        Muons["index"] = events.Muonidx0.index # Attach the local index for easier calculations later
+        sel_muon = Muons.p > 2.0
+        selected_muons = ak.mask(Muons, sel_muon)
+
+        # Select events with at least 4 muons
+        at_least_4_muons = ak.num(selected_muons, axis=1) > 3
+        events_with_at_least_4_muons = ak.mask(events.ReconstructedParticles, at_least_4_muons)
+
+        selected_muons = ak.mask(selected_muons, at_least_4_muons)
+
+        # Build Z resonances
+        Z, l1, l2 = resonanceBuilder_mass(resonance_mass=91.2, use_MC_Kinematics=False, leptons=selected_muons)
+
+        # On Shell Z
+        zll = ak.firsts(Z)
+        l1 = ak.firsts(l1)
+        l2 = ak.firsts(l2)
+
+        # Remove the used up muons from the muon list
+        on_shell_z_l1 = l1[:, np.newaxis]
+        on_shell_z_l2 = l2[:, np.newaxis]
+        l1_removed = selected_muons.index != on_shell_z_l1.index
+        l2_removed = selected_muons.index != on_shell_z_l2.index
+        rest_of_muons = selected_muons[l1_removed & l2_removed]
+
+        m1, m2 = getTwoHighestPMuons(rest_of_muons)
+
+        non_res_Z = m1 + m2
+        # Angle between the two
+        non_res_Z_angle = m1.deltaangle(m2)
+
+        # Collect all the four Muons
+        fourMuons_collected = ak.concatenate(
+            (
+                l1[:, np.newaxis],
+                l2[:, np.newaxis],
+                m1[:, np.newaxis],
+                m2[:, np.newaxis]
+            ),
+            axis=1
+        )
+        fourMuons = zll + non_res_Z
+
+        fourMuons_pmin = ak.min(fourMuons_collected.p, axis=1)
+
+        # rest_of_particles = remove(events_with_at_least_4_muons, fourMuons_collected)
+        rest_of_particles = remove(events.ReconstructedParticles, fourMuons_collected)
+        all_others = sum_all(rest_of_particles)
+
+        Emiss = recoilBuilder(sum_all(events.ReconstructedParticles), ecm=config.ecm)
+        pmiss = Emiss.E
+
+        # Cone Isolation
+        fourMuons_iso = coneIsolation(fourMuons_collected, rest_of_particles, min_dr=0.0, max_dr=0.523599)
+        fourMuons_min_iso = ak.max(fourMuons_iso, axis=1)
+        
+        #Placeholder
         E = events.ReconstructedParticles.E
 
         # Define individual cuts
         cut.add('No cut', ak.all(E > 0, axis=1))
-        cut.add('cut1', ak.all(E < 100, axis=1))
-        cut.add('cut2', ak.all(E < 90, axis=1))
-        cut.add('cut3', ak.all(E < 80, axis=1))
-        cut.add('cut4', ak.all(E < 70, axis=1))
-        cut.add('cut5', ak.all(E < 60, axis=1))
-        cut.add('cut6', ak.all(E < 50, axis=1))
+        cut.add('cut1', ak.all(E > 0, axis=1))
+        cut.add('cut2', ak.all(E > 0, axis=1))
+        cut.add('cut3', ak.all(E > 0, axis=1))
+        cut.add('cut4', ak.all(E > 0, axis=1))
+        cut.add('cut5', ak.all(E > 0, axis=1))
+        cut.add('cut6', ak.all(E > 0, axis=1))
+        cut.add('at_least_4_muons', at_least_4_muons)
         
 
-        # Selections: A collection of cuts
+        # Selections: A collection of cuts (event selections)
         sel = {}
         sel[0] = ['No cut']
         sel[1] = ['No cut','cut1']
@@ -73,15 +136,15 @@ class Fourleptons(processor.ProcessorABC):
         vars_sel = {}
         for key,selections in sel.items():
             vars_sel[key] = {
-                'selectedmuons_p':E[cut.all(*selections)],
-                'fourmuons_mass':E[cut.all(*selections)],
-                'fourmuons_pmin':E[cut.all(*selections)],
-                'Z_res_mass':E[cut.all(*selections)],
-                'Z_non_res_mass':E[cut.all(*selections)],
-                'vis_e_woMuons':E[cut.all(*selections)],
-                'iso_least_isolated_muon':E[cut.all(*selections)],
-                'missing_p':E[cut.all(*selections)],
-                'cos_theta_miss':E[cut.all(*selections)],
+                'selectedmuons_p':selected_muons.p[cut.all(*selections)],
+                'fourmuons_mass':fourMuons.m[cut.all(*selections)],
+                'fourmuons_pmin':fourMuons_pmin[cut.all(*selections)],
+                'Z_res_mass':zll.m[cut.all(*selections)],
+                'Z_non_res_mass':non_res_Z.m[cut.all(*selections)],
+                'vis_e_woMuons':all_others.E[cut.all(*selections)],
+                'iso_least_isolated_muon':fourMuons_min_iso[cut.all(*selections)],
+                'missing_p':pmiss[cut.all(*selections)],
+                'cos_theta_miss':Emiss.theta[cut.all(*selections)],
             }
         
 
@@ -110,3 +173,4 @@ class Fourleptons(processor.ProcessorABC):
 
     def postprocess(self, accumulator):
         pass
+

@@ -31,26 +31,30 @@ process = {
 }
 fraction = {
         # Signal
-        'wzp6_ee_qqH_HZZ_llll_ecm240':0.01,
-        'wzp6_ee_nunuH_HZZ_ecm240':0.01,
+        'wzp6_ee_qqH_HZZ_llll_ecm240':0.1,
+        'wzp6_ee_nunuH_HZZ_ecm240':0.1,
         # Backgrounds
-        'p8_ee_Zqq_ecm240':0.01,
-        'p8_ee_ZZ_ecm240':0.01,
-        'p8_ee_WW_ecm240':0.01,
-        'wzp6_ee_tautauH_HWW_ecm240':0.01,
-        'wzp6_ee_ccH_HWW_ecm240':0.01,
-        'wzp6_ee_bbH_HWW_ecm240':0.01,
-        'wzp6_ee_mumuH_HWW_ecm240':0.01,
-        'wzp6_ee_mumuH_Hcc_ecm240':0.01,
-        'wzp6_ee_mumuH_Hbb_ecm240':0.01,
-        'wzp6_ee_mumuH_Hgg_ecm240':0.01,
-        'wzp6_ee_mumuH_HZa_ecm240':0.01,
+        'p8_ee_Zqq_ecm240':0.1,
+        'p8_ee_ZZ_ecm240':0.1,
+        'p8_ee_WW_ecm240':0.1,
+        'wzp6_ee_tautauH_HWW_ecm240':0.1,
+        'wzp6_ee_ccH_HWW_ecm240':0.1,
+        'wzp6_ee_bbH_HWW_ecm240':0.1,
+        'wzp6_ee_mumuH_HWW_ecm240':0.1,
+        'wzp6_ee_mumuH_Hcc_ecm240':0.1,
+        'wzp6_ee_mumuH_Hbb_ecm240':0.1,
+        'wzp6_ee_mumuH_Hgg_ecm240':0.1,
+        'wzp6_ee_mumuH_HZa_ecm240':0.1,
 }
 ecm = 240.0 # #\sqrt(s) in GeV
 local_yaml_dict = "../../filesets/"
-output_path = "outputs"
+#output_path = "outputs"
+output_path = "Batch"
 output_filename = "4leptons"
 executor = "dask" # 'dask' is local and 'condor' is batch
+#executor = "condor"
+job_flavor = "longlunch" # 'job flavor' in case condor is used
+transfer_these_extra_files=["functions.py"]
 
 use_schema = "FCC"
 schema_version = "latest"

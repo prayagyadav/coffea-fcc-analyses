@@ -1,0 +1,45 @@
+000 (13846623.000.000) 05/18 22:35:51 Job submitted from host: <137.138.120.116:9618?addrs=137.138.120.116-9618+[2001-1458-d00-16--17b]-9618&alias=bigbird12.cern.ch&noUDP&sock=schedd_9562_50ad>
+...
+040 (13846623.000.000) 05/18 22:37:54 Started transferring input files
+	Transferring to host: <188.185.198.159:9618?addrs=188.185.198.159-9618+[2001-1458-303-25--100-9b]-9618&alias=b9p15p2641.cern.ch&noUDP&sock=slot1_5_1509039_3d4e_4439>
+...
+040 (13846623.000.000) 05/18 22:37:54 Finished transferring input files
+...
+001 (13846623.000.000) 05/18 22:37:54 Job executing on host: <188.185.198.159:9618?addrs=188.185.198.159-9618+[2001-1458-303-25--100-9b]-9618&alias=b9p15p2641.cern.ch&noUDP&sock=startd_6016_0dd8>
+	SlotName: slot1_5@b9p15p2641.cern.ch
+	CondorScratchDir = "/pool/condor/dir_4088241"
+	Cpus = 1
+	Disk = 3839
+	GPUs = 0
+	Memory = 3000
+...
+006 (13846623.000.000) 05/18 22:38:03 Image size of job updated: 1800
+	2  -  MemoryUsage of job (MB)
+	1800  -  ResidentSetSize of job (KB)
+...
+006 (13846623.000.000) 05/18 22:43:04 Image size of job updated: 29842532
+	29144  -  MemoryUsage of job (MB)
+	29842532  -  ResidentSetSize of job (KB)
+...
+040 (13846623.000.000) 05/18 22:51:02 Started transferring output files
+...
+040 (13846623.000.000) 05/18 22:51:02 Finished transferring output files
+...
+005 (13846623.000.000) 05/18 22:51:02 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:05:52, Sys 0 00:12:21  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:05:52, Sys 0 00:12:21  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	10703  -  Run Bytes Sent By Job
+	566835  -  Run Bytes Received By Job
+	10703  -  Total Bytes Sent By Job
+	566835  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :     1.43        1         1 
+	   Disk (KB)            :  1065         750      3839 
+	   GPUs                 :                           0 
+	   Memory (MB)          : 29144        3000      3000 
+
+	Job terminated of its own accord at 2025-05-18T20:51:01Z with exit-code 0.
+...

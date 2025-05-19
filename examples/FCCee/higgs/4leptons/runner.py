@@ -301,7 +301,7 @@ echo $(ls)'''
     def create_submit_file(filename, executable, input, output):
         s = f'''universe=vanilla
 executable={executable}
-+JobFlavour="espresso"
++JobFlavour="{job_flavor}"
 RequestCpus=1
 should_transfer_files=YES
 when_to_transfer_output=ON_EXIT_OR_EVICT
@@ -382,6 +382,9 @@ queue 1'''
             os.makedirs(batch_dir)
         os.chdir(batch_dir)
 
+        import config
+        extra_condor_shipment = "".join([f"{pwd}/"+filename+"," for filename in getattr(config, "transfer_these_extra_files", [])])
+
         for i in range(len(dataset_runnable)):
 
             if inputs.chunks > 1:
@@ -431,7 +434,7 @@ queue 1'''
             create_submit_file(
                 filename=f'submit_{i}.sh',
                 executable=f'job_{i}.sh',
-                input=f'{pwd}/{batch_dir}/job_{i}.py,{pwd}/{processor_path}.py,{pwd}/config.py, {pwd}/{batch_dir}/{to_ship}.tar',
+                input=f'{pwd}/{batch_dir}/job_{i}.py,{pwd}/{processor_path}.py,{pwd}/config.py,{pwd}/{batch_dir}/{to_ship}.tar, {extra_condor_shipment}',
                 output=f'singularity.log.job_{i},{output_filename}'
             )
             subprocess.run(['chmod','u+x',f'submit_{i}.sh'])

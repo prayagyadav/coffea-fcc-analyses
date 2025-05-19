@@ -1,0 +1,36 @@
+000 (13846633.000.000) 05/18 22:36:45 Job submitted from host: <137.138.120.116:9618?addrs=137.138.120.116-9618+[2001-1458-d00-16--17b]-9618&alias=bigbird12.cern.ch&noUDP&sock=schedd_9562_50ad>
+...
+040 (13846633.000.000) 05/18 22:37:57 Started transferring input files
+	Transferring to host: <188.185.195.181:9618?addrs=188.185.195.181-9618+[2001-1458-303-22--100-b1]-9618&alias=b9p17p4788.cern.ch&noUDP&sock=slot1_12_3153989_52d9_31795>
+...
+040 (13846633.000.000) 05/18 22:37:57 Finished transferring input files
+...
+001 (13846633.000.000) 05/18 22:37:57 Job executing on host: <188.185.195.181:9618?addrs=188.185.195.181-9618+[2001-1458-303-22--100-b1]-9618&alias=b9p17p4788.cern.ch&noUDP&sock=startd_5254_62ad>
+	SlotName: slot1_12@b9p17p4788.cern.ch
+	CondorScratchDir = "/pool/condor/dir_1181355"
+	Cpus = 1
+	Disk = 3775
+	GPUs = 0
+	Memory = 3000
+...
+006 (13846633.000.000) 05/18 22:38:06 Image size of job updated: 1784
+	2  -  MemoryUsage of job (MB)
+	1784  -  ResidentSetSize of job (KB)
+...
+006 (13846633.000.000) 05/18 22:42:55 Image size of job updated: 91740
+	90  -  MemoryUsage of job (MB)
+	91740  -  ResidentSetSize of job (KB)
+...
+040 (13846633.000.000) 05/18 22:42:55 Started transferring output files
+...
+040 (13846633.000.000) 05/18 22:42:55 Finished transferring output files
+...
+007 (13846633.000.000) 05/18 22:42:55 Shadow exception!
+	Error from slot1_12@b9p17p4788.cern.ch: STARTER at 188.185.195.181 failed to send file(s) to <137.138.120.116:9618>: |Error: reading from file /pool/condor/dir_1181355/4leptons-chunk10.coffea: (errno 2) No such file or directory; SHADOW failed to receive file(s) from <188.185.195.181:39977>
+	8834  -  Run Bytes Sent By Job
+	566654  -  Run Bytes Received By Job
+...
+012 (13846633.000.000) 05/18 22:42:55 Job was held.
+	Transfer output files failure at execution point slot1_12@b9p17p4788.cern.ch while sending files to access point bigbird12. Details: reading from file /pool/condor/dir_1181355/4leptons-chunk10.coffea: (errno 2) No such file or directory
+	Code 12 Subcode 2
+...
