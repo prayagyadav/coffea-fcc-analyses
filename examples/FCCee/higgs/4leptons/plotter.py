@@ -343,7 +343,7 @@ def makeplot(fig, ax, hist, name, title, label, xlabel, ylabel, bins, xmin, xmax
             stack=stack,
             edgecolor='black',
             linewidth=1,
-            sort='yield',
+            sort='yield_r',
             ax=ax
         )
 

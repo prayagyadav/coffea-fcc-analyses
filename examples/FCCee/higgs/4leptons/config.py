@@ -138,4 +138,4 @@ collider       = 'FCC-ee'
 yield_table_scale = 0.7 # reduce font sizes in yield table by this factor, so that they fit in the figure area
 legend_location = (0.64, 0.64) # Coordinate of the bottom left corner of the legend wrt to the plot area
 FCC_text_location = (0.30,1.02) # Coordinate of the bottom left corner of the FCC text wrt to the plot area
-Reverse_legend_labels = True # Reverse legend order without changing the stack order
+Reverse_legend_labels = False # Reverse legend order without changing the stack order

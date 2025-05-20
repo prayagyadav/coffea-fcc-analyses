@@ -34,3 +34,8 @@
 	Transfer output files failure at execution point slot1_12@b9p17p4788.cern.ch while sending files to access point bigbird12. Details: reading from file /pool/condor/dir_1181355/4leptons-chunk10.coffea: (errno 2) No such file or directory
 	Code 12 Subcode 2
 ...
+009 (13846633.000.000) 05/19 22:43:28 Job was aborted.
+	Job removed by SYSTEM_PERIODIC_REMOVE due to wall time exceeded allowed max.
+
+	Job terminated by itself at 2025-05-18T20:42:55Z (using method 0: OF_ITS_OWN_ACCORD).
+...
