@@ -91,7 +91,8 @@ processor_kwargs = {}
 ######################
 # Plotting Variables #
 ######################
-selections = ['sel0','sel1','sel2','sel3','sel4','sel5','sel6']
+# selections = ['sel0','sel1','sel2','sel3','sel4','sel5','sel6']
+selections = ['sel0']
 stack = [True, False]
 log = [True, False]
 formats = ['png']
@@ -107,7 +108,7 @@ req_hists = {
         "WW":{"type":'Background',"datasets":['p8_ee_WW_ecm240'],"color":'gray'},
         "HWW":{"type":'Background',"datasets":['wzp6_ee_mumuH_HWW_ecm240','wzp6_ee_bbH_HWW_ecm240','wzp6_ee_tautauH_HWW_ecm240','wzp6_ee_ccH_HWW_ecm240'],"color":'teal'},
         "mumuH_HZa":{"type":'Background',"datasets":['wzp6_ee_mumuH_HZa_ecm240'],"color":'green'},
-        
+
 }
 cross_sections = {#in pb # Taken as is from FCC events catalogue at https://fcc-physics-events.web.cern.ch/FCCee/winter2023/Delphesevents_IDEA.php
                   # Signal
@@ -138,4 +139,6 @@ collider       = 'FCC-ee'
 yield_table_scale = 0.7 # reduce font sizes in yield table by this factor, so that they fit in the figure area
 legend_location = (0.64, 0.64) # Coordinate of the bottom left corner of the legend wrt to the plot area
 FCC_text_location = (0.30,1.02) # Coordinate of the bottom left corner of the FCC text wrt to the plot area
+custom_mc_order = ['ZZ', 'Zqq', 'mumuH_Hjj', 'WW', 'HWW', 'mumuH_HZa']
+# custom_mc_order = custom_mc_ordera[::-1]
 Reverse_legend_labels = False # Reverse legend order without changing the stack order

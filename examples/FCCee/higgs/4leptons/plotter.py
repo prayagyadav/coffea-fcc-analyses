@@ -76,6 +76,18 @@ def get_xsec_scale(dataset, raw_events, Luminosity):
         raise ValueError('Raw events less than of equal to zero!')
     return round(float(sf),3)
 
+def hist_sorter(preferred_order, unsorted_hists, unsorted_labels, unsorted_colors):
+    '''Custom histogram sorter to plot in histplot'''
+    sorted_hists, sorted_labels, sorted_colors = [], [], []
+    for l in preferred_order:
+        pos = unsorted_labels.index(l)
+        sorted_hists.append(unsorted_hists[pos])
+        sorted_labels.append(unsorted_labels[pos])
+        sorted_colors.append(unsorted_colors[pos])
+
+    return sorted_hists, sorted_labels, sorted_colors
+
+
 def yield_plot(name, title, keys, scaled, unscaled, formats, path, plot_width=8, plot_height=8):
     '''
     Create yield plots
@@ -281,6 +293,12 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
             for log_mode in log :
                 for stack_mode in stack:
                     fig, ax = plt.subplots(figsize=(8,8))
+
+                    order = getattr(config, "custom_mc_order", None)
+                    if not order is None:
+                        print("Triggered: Reverse histograms")
+                        hist, label_list, color_list = hist_sorter(order, hist, label_list, color_list)
+
                     #Backgrounds
                     makeplot(
                         fig=fig,
