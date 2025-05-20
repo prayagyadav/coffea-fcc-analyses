@@ -11,48 +11,57 @@ import config
 
 plot_props = pd.DataFrame(config.plots)
 
-def get_subdict(dicts, key):
-    '''
-    Get list of subdictionaries(if available) from a list of dictionaries
-    '''
-    out = []
-    for d in dicts:
-        for k in d.keys():
-            if key == k:
-                out.append(d[key])
-    return out
+from collections import defaultdict
+from numbers import Number
 
 def accumulate(dicts):
     """
-    Merges an array of dictionaries and adds up the values of common keys.
-
-    Parameters:
-    dicts (list): A list of dictionaries to be merged.
-
-    Returns:
-    dict: A dictionary with combined keys and values summed for common keys.
+    Recursively merges a list of dictionaries, supporting:
+    - Numeric summation
+    - List concatenation
+    - Set union
+    - Histogram addition (from `hist`)
+    - Nested dictionaries
+    - Key exceptions (preserve first)
     """
-    exception_list = ['Labels'] # These keys will not be repeated but included once.
+    try:
+        from hist import Hist
+    except ImportError:
+        Hist = None  # Skip if hist is not available
+
+    exception_list = {'Labels'}
+    grouped = defaultdict(list)
+
+    for d in dicts:
+        for k, v in d.items():
+            grouped[k].append(v)
+
     outdict = {}
 
-    for diction in dicts:
-        dictionary = copy.deepcopy(diction)
+    for key, values in grouped.items():
+        first = values[0]
 
-        for key, value in dictionary.items():
-            # print(f"{key} : {value}")
-            # print(type(value))
-
-            if isinstance(value,dict):
-                value = accumulate(get_subdict(dicts,key))
-                outdict[key] = value
-            else:
-                if key in outdict.keys():
-                    if key in exception_list:
-                        pass
-                    else:
-                        outdict[key] += value  # Add values if the key is common
-                else:
-                    outdict[key] = value  # Otherwise, add the new key-value pair
+        if key in exception_list:
+            outdict[key] = first
+        elif all(isinstance(v, dict) for v in values):
+            outdict[key] = accumulate(values)
+        elif all(isinstance(v, list) for v in values):
+            outdict[key] = sum(values, [])  # concatenate
+        elif all(isinstance(v, set) for v in values):
+            result = set()
+            for v in values:
+                result |= v
+            outdict[key] = result
+        elif Hist and all(isinstance(v, Hist) for v in values):
+            total = values[0]
+            for v in values[1:]:
+                total += v
+            outdict[key] = total
+        elif all(isinstance(v, Number) for v in values):
+            outdict[key] = sum(values)
+        else:
+            # Mixed types or strings — keep the first
+            outdict[key] = first
 
     return outdict
 
@@ -82,7 +91,7 @@ def yield_plot(name, title, keys, scaled, unscaled, formats, path, plot_width=8,
     ax.text(0.10, 0.81, 'Signal : $'+config.ana_tex+'$', fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
     ax.text(0.10, 0.74, '$L = '+str(config.intLumi/1e6)+' ab^{-1}$', fontsize=14, horizontalalignment='left', verticalalignment='center', transform=ax.transAxes)
 
-    
+
     table_scale = getattr(config, "yield_table_scale", 1)
     print("table_scale", table_scale)
     level, linespacing = 0.72, 0.05
@@ -343,7 +352,7 @@ def makeplot(fig, ax, hist, name, title, label, xlabel, ylabel, bins, xmin, xmax
             stack=stack,
             edgecolor='black',
             linewidth=1,
-            sort='yield_r',
+            sort='label',
             ax=ax
         )
 

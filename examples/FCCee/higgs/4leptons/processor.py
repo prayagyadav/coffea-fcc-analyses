@@ -54,7 +54,7 @@ class Fourleptons(processor.ProcessorABC):
         selected_muons = ak.mask(Muons, sel_muon)
 
         # Select events with at least 4 muons
-        at_least_4_muons = ak.num(selected_muons, axis=1) > 3
+        at_least_4_muons = ak.num(ak.drop_none(selected_muons), axis=1) > 3
         events_with_at_least_4_muons = ak.mask(events.ReconstructedParticles, at_least_4_muons)
 
         selected_muons = ak.mask(selected_muons, at_least_4_muons)
@@ -104,7 +104,7 @@ class Fourleptons(processor.ProcessorABC):
         # Cone Isolation
         fourMuons_iso = coneIsolation(fourMuons_collected, rest_of_particles, min_dr=0.0, max_dr=0.523599)
         fourMuons_min_iso = ak.max(fourMuons_iso, axis=1)
-        
+
         #Placeholder
         E = events.ReconstructedParticles.E
 
@@ -117,7 +117,7 @@ class Fourleptons(processor.ProcessorABC):
         cut.add('cut5', ak.all(E > 0, axis=1))
         cut.add('cut6', ak.all(E > 0, axis=1))
         cut.add('at_least_4_muons', at_least_4_muons)
-        
+
 
         # Selections: A collection of cuts (event selections)
         sel = {}
@@ -131,7 +131,7 @@ class Fourleptons(processor.ProcessorABC):
 
         # Get cutflow hists
         sel_ocl = {key:cut.cutflow(*val).yieldhist() for key,val in sel.items()}
-        
+
         # Apply the selection to the relevant variables
         vars_sel = {}
         for key,selections in sel.items():
@@ -146,7 +146,7 @@ class Fourleptons(processor.ProcessorABC):
                 'missing_p':pmiss[cut.all(*selections)],
                 'cos_theta_miss':Emiss.theta[cut.all(*selections)],
             }
-        
+
 
         #Prepare output
         Output = {
@@ -173,4 +173,3 @@ class Fourleptons(processor.ProcessorABC):
 
     def postprocess(self, accumulator):
         pass
-
