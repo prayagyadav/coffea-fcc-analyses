@@ -1,0 +1,30 @@
+000 (13877735.000.000) 05/21 16:17:36 Job submitted from host: <137.138.120.116:9618?addrs=137.138.120.116-9618+[2001-1458-d00-16--17b]-9618&alias=bigbird12.cern.ch&noUDP&sock=schedd_9562_50ad>
+...
+040 (13877735.000.000) 05/21 16:18:36 Started transferring input files
+	Transferring to host: <128.142.248.79:9618?addrs=128.142.248.79-9618+[2001-1458-301-73--100-13f]-9618&alias=b9g23p1840.cern.ch&noUDP&sock=slot1_9_702192_8983_8045>
+...
+040 (13877735.000.000) 05/21 16:18:36 Finished transferring input files
+...
+001 (13877735.000.000) 05/21 16:18:36 Job executing on host: <128.142.248.79:9618?addrs=128.142.248.79-9618+[2001-1458-301-73--100-13f]-9618&alias=b9g23p1840.cern.ch&noUDP&sock=startd_5503_2dc2>
+	SlotName: slot1_9@b9g23p1840.cern.ch
+	CondorScratchDir = "/pool/condor/dir_282392"
+	Cpus = 1
+	Disk = 3818
+	GPUs = 0
+	Memory = 3000
+...
+004 (13877735.000.000) 05/21 17:14:36 Job was evicted.
+	(0) CPU times
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	566860  -  Run Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                 1         1 
+	   Disk (KB)            :      750      750      3818 
+	   GPUs                 :                           0 
+	   Memory (MB)          :              3000      3000 
+...
+009 (13877735.000.000) 05/21 17:14:36 Job was aborted.
+	via condor_rm (by user pryadav)
+...
