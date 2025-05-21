@@ -79,7 +79,7 @@ def get_xsec_scale(dataset, raw_events, Luminosity):
 def hist_sorter(preferred_order, unsorted_hists, unsorted_labels, unsorted_colors):
     '''Custom histogram sorter to plot in histplot'''
     sorted_hists, sorted_labels, sorted_colors = [], [], []
-    for l in preferred_order:
+    for l in preferred_order[::-1]:
         pos = unsorted_labels.index(l)
         sorted_hists.append(unsorted_hists[pos])
         sorted_labels.append(unsorted_labels[pos])
@@ -297,16 +297,18 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
                     order = getattr(config, "custom_mc_order", None)
                     if not order is None:
                         print("Triggered: Reverse histograms")
-                        hist, label_list, color_list = hist_sorter(order, hist, label_list, color_list)
+                        ordered_hist, ordered_label_list, ordered_color_list = hist_sorter(order, hist, label_list, color_list)
+                    else:
+                        ordered_hist, ordered_label_list, ordered_color_list = hist, label_list, color_list
 
                     #Backgrounds
                     makeplot(
                         fig=fig,
                         ax=ax,
-                        hist=hist,
+                        hist=ordered_hist,
                         name=plotprops[hist_name].name,
                         title=plotprops[hist_name].title,
-                        label=label_list,
+                        label=ordered_label_list,
                         xlabel=plotprops[hist_name].xlabel,
                         ylabel=plotprops[hist_name].ylabel,
                         bins=plotprops[hist_name].bins,
@@ -314,7 +316,7 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
                         xmax=plotprops[hist_name].xmax,
                         log=log_mode,
                         stack=True, #Always stack backgrounds
-                        color=color_list,
+                        color=ordered_color_list,
                         histtype='fill',
                         cutflow_mode=cutflow_mode,
                         xticks=8
@@ -370,7 +372,7 @@ def makeplot(fig, ax, hist, name, title, label, xlabel, ylabel, bins, xmin, xmax
             stack=stack,
             edgecolor='black',
             linewidth=1,
-            sort='label',
+            # sort='label',
             ax=ax
         )
 
