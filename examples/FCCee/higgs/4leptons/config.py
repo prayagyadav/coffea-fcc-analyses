@@ -29,22 +29,23 @@ process = {
         'wzp6_ee_mumuH_HZa_ecm240',
         ]
 }
+reduction_factor = 0.001
 fraction = {
         # Signal
-        'wzp6_ee_qqH_HZZ_llll_ecm240':0.1,
-        'wzp6_ee_nunuH_HZZ_ecm240':0.1,
+        'wzp6_ee_qqH_HZZ_llll_ecm240':1*reduction_factor,
+        'wzp6_ee_nunuH_HZZ_ecm240':1*reduction_factor,
         # Backgrounds
-        'p8_ee_Zqq_ecm240':0.1,
-        'p8_ee_ZZ_ecm240':0.1,
-        'p8_ee_WW_ecm240':0.1,
-        'wzp6_ee_tautauH_HWW_ecm240':0.1,
-        'wzp6_ee_ccH_HWW_ecm240':0.1,
-        'wzp6_ee_bbH_HWW_ecm240':0.1,
-        'wzp6_ee_mumuH_HWW_ecm240':0.1,
-        'wzp6_ee_mumuH_Hcc_ecm240':0.1,
-        'wzp6_ee_mumuH_Hbb_ecm240':0.1,
-        'wzp6_ee_mumuH_Hgg_ecm240':0.1,
-        'wzp6_ee_mumuH_HZa_ecm240':0.1,
+        'p8_ee_Zqq_ecm240':1*reduction_factor,
+        'p8_ee_ZZ_ecm240':1*reduction_factor,
+        'p8_ee_WW_ecm240':1*reduction_factor,
+        'wzp6_ee_tautauH_HWW_ecm240':1*reduction_factor,
+        'wzp6_ee_ccH_HWW_ecm240':1*reduction_factor,
+        'wzp6_ee_bbH_HWW_ecm240':1*reduction_factor,
+        'wzp6_ee_mumuH_HWW_ecm240':1*reduction_factor,
+        'wzp6_ee_mumuH_Hcc_ecm240':1*reduction_factor,
+        'wzp6_ee_mumuH_Hbb_ecm240':1*reduction_factor,
+        'wzp6_ee_mumuH_Hgg_ecm240':1*reduction_factor,
+        'wzp6_ee_mumuH_HZa_ecm240':1*reduction_factor,
 }
 ecm = 240.0 # #\sqrt(s) in GeV
 local_yaml_dict = "../../filesets/"
