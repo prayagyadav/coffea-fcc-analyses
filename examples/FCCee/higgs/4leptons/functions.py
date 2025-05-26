@@ -33,8 +33,8 @@ def resonanceBuilder_mass(resonance_mass=None, use_MC_Kinematics=False, leptons=
     Reso = ak.fill_none(Reso,[],axis=0) #Transform the None values at axis 0 to []
     used_lep1 = ak.fill_none(used_lep1, [], axis=0)
     used_lep2 = ak.fill_none(used_lep2, [], axis=0)
-    
-    
+
+
     return Reso, used_lep1, used_lep2
 
 # 2. To replace: FCCAnalyses::ZHfunctions::getTwoHighestPMuons(rest_of_muons)") # Find the higest p muon pair from the remaining muons (off-shell Z)
@@ -49,23 +49,27 @@ def getTwoHighestPMuons(muons):
 
     # First particle is always selected, if the second one has the opposite charge, then its accepted otherwise we move on to the third and so on
     # Interestingly, this type of operation is non trivial in an array format
-    first_muon, other_muons = sorted_muons[:, 0], sorted_muons[:, 1:]
+    first_muon, other_muons = sorted_muons[:, 0:1], sorted_muons[:, 1:]
+
+    # prepare before cartesian : replace none with []
+    first_muon = ak.fill_none(first_muon, [], axis=0)
+    other_muons = ak.fill_none(other_muons, [], axis=0)
     # All combinations
-    all_comb = ak.cartesian((first_muon, other_muons))
+    all_comb = ak.cartesian([first_muon, other_muons])
     l1, l2 = ak.unzip(all_comb)
     charge_mask = (l1.charge + l2.charge) == 0
     opp_comb = all_comb[charge_mask]
     # obtain the first one from here
     # but first make sure that at least one element is available
     masked_opp_comb = ak.mask(all_comb, ak.num(all_comb, axis=1) > 0)
-    
-    
+
+
     best_two_muons = masked_opp_comb[:, 0]
     return ak.unzip(best_two_muons)
 # 3. To sum all the lorentz vectors in a an array of lorentzvectors
 def sum_all(array_of_lv):
     array_of_lv = ak.drop_none(array_of_lv)
-    
+
     out = ak.zip(
         {
             "px":ak.sum(array_of_lv.px , axis=1),
@@ -78,7 +82,7 @@ def sum_all(array_of_lv):
 
     return out
 # 4. To replace : FCCAnalyses::ZHfunctions::coneIsolation(0.0,0.523599)(fourMuons,rest_of_particles)
-def coneIsolation(particle, rest_of_the_particles, min_dr=0 , max_dr=0.4):
+def coneIsolation(particle, rest_of_the_particles, min_dr=0.0 , max_dr=0.4):
     ''' Refer: https://github.com/delphes/delphes/blob/master/modules/Isolation.cc#L154
     '''
     neutral_particles = ak.mask(rest_of_the_particles, rest_of_the_particles.charge == 0)
@@ -104,5 +108,5 @@ def coneIsolation(particle, rest_of_the_particles, min_dr=0 , max_dr=0.4):
     total_sum = sumNeutral + sumNeutral
 
     ratio = total_sum / particle.p
-    
+
     return ratio

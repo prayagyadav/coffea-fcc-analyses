@@ -100,7 +100,7 @@ if __name__=="__main__":
             import_string = "from coffea.nanoevents import FCC"
         else:
             raise FileExistsError(f"The requested schema {use_schema} is not available.")
-    
+
         [f, import_module, i, schema_caller] = import_string.split(' ')
         module = importlib.import_module(import_module)
         schema_handler = getattr(module, schema_caller)
@@ -152,6 +152,12 @@ if __name__=="__main__":
             yaml_dict[sample] = dict
         return yaml_dict
 
+    def assign_events(cumsum, needed_events):
+        if needed_events > cumsum[-1]:
+            return len(cumsum)-1
+        diff = cumsum - needed_events
+        return np.argwhere(diff >= 0)[0][0]
+
     def get_fileset(yaml_dict, fraction, skipbadfiles=True, redirector=''):
         '''
         Returns fileset a fraction of fileset in the dask compatible format
@@ -189,8 +195,14 @@ if __name__=="__main__":
             frac = fraction[proc]
             needed_events = frac*nevents
 
-            #get closest value and index to the needed events
-            index = np.abs(cumulative_events - needed_events).argmin()
+            # #get closest value and index to the needed events
+            # index = np.abs(cumulative_events - needed_events).argmin()
+            #
+            # FCCAnalyses uses the ceiling value instead of closest value
+            # Eg. if we need 341 events and cumsum is [...300 , 400 ...] , then 400 events are choosen, even though 341 events is more closer to 300 events in comparison to 400
+            # To get this ceiling value, we could get the most positive value from the cumulative_events - needed_events difference
+            index = assign_events(cumulative_events, needed_events)
+
             assigned_events = cumulative_events[index]
             assigned_files = filenames[:index+1]
 
@@ -329,7 +341,7 @@ queue 1'''
     raw_yaml = load_yaml_fileinfo(process)
     myfileset = get_fileset(raw_yaml, fraction, redirector='root://eospublic.cern.ch/')
     fileset = break_into_many(input_fileset=myfileset,n=inputs.chunks)
-    
+
 
     print('Preparing fileset before run...')
 
@@ -399,7 +411,7 @@ queue 1'''
                     root_dir=local_dir,
                     base_dir=to_ship
                     )
-            
+
             folder_path = os.path.join(local_dir, to_ship)
             output_tar = os.path.join(local_dir, to_ship + '.tar')
             # To remove hidden files from tar
@@ -414,7 +426,7 @@ queue 1'''
                         # Get archive path with the top-level folder included
                         rel_path = os.path.relpath(full_path, os.path.dirname(folder_path))
                         tar.add(full_path, arcname=rel_path)
-            
+
 
             create_job_python_file(
                 ecm,

@@ -10,6 +10,7 @@ import hist
 import vector
 vector.register_awkward()
 import config
+import functions
 import sys
 import os
 local_dir = os.environ['LOCAL_DIR']
@@ -60,7 +61,7 @@ class Fourleptons(processor.ProcessorABC):
         selected_muons = ak.mask(selected_muons, at_least_4_muons)
 
         # Build Z resonances
-        Z, l1, l2 = resonanceBuilder_mass(resonance_mass=91.2, use_MC_Kinematics=False, leptons=selected_muons)
+        Z, l1, l2 = functions.resonanceBuilder_mass(resonance_mass=91.2, use_MC_Kinematics=False, leptons=selected_muons)
 
         # On Shell Z
         zll = ak.firsts(Z)
@@ -74,7 +75,7 @@ class Fourleptons(processor.ProcessorABC):
         l2_removed = selected_muons.index != on_shell_z_l2.index
         rest_of_muons = selected_muons[l1_removed & l2_removed]
 
-        m1, m2 = getTwoHighestPMuons(rest_of_muons)
+        m1, m2 = functions.getTwoHighestPMuons(rest_of_muons)
 
         non_res_Z = m1 + m2
         # Angle between the two
@@ -90,19 +91,20 @@ class Fourleptons(processor.ProcessorABC):
             ),
             axis=1
         )
+        fourMuons_collected = ak.mask(fourMuons_collected, ak.num(fourMuons_collected, axis = 1) > 3)
         fourMuons = zll + non_res_Z
 
         fourMuons_pmin = ak.min(fourMuons_collected.p, axis=1)
 
         # rest_of_particles = remove(events_with_at_least_4_muons, fourMuons_collected)
         rest_of_particles = remove(events.ReconstructedParticles, fourMuons_collected)
-        all_others = sum_all(rest_of_particles)
+        all_others = functions.sum_all(rest_of_particles)
 
-        Emiss = recoilBuilder(sum_all(events.ReconstructedParticles), ecm=config.ecm)
+        Emiss = recoilBuilder(functions.sum_all(events.ReconstructedParticles), ecm=config.ecm)
         pmiss = Emiss.E
 
         # Cone Isolation
-        fourMuons_iso = coneIsolation(fourMuons_collected, rest_of_particles, min_dr=0.0, max_dr=0.523599)
+        fourMuons_iso = functions.coneIsolation(fourMuons_collected, rest_of_particles, min_dr=0.0, max_dr=0.523599)
         fourMuons_min_iso = ak.max(fourMuons_iso, axis=1)
 
         #Placeholder
