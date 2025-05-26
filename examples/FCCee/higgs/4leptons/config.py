@@ -29,7 +29,7 @@ process = {
         'wzp6_ee_mumuH_HZa_ecm240',
         ]
 }
-reduction_factor = 0.001
+reduction_factor = 0.01
 fraction = {
         # Signal
         'wzp6_ee_qqH_HZZ_llll_ecm240':1*reduction_factor,
