@@ -33,6 +33,12 @@ def get_1Dhist(name, var, flatten=False):
     var = var[~dak.is_none(var, axis=0)] # Remove None values only
     return hda.Hist.new.Reg(props.bins, props.xmin, props.xmax).Double().fill(var)
 
+def create_mask(a, b, c):
+    mask1 = a != c
+    mask2 = b != c
+    mask = mask1 & mask2
+    return mask
+
 #################################
 #Begin the processor definition #
 #################################
@@ -52,30 +58,23 @@ class Fourleptons(processor.ProcessorABC):
         Muons = events.ReconstructedParticles[events.Muonidx0.index]
         Muons["index"] = events.Muonidx0.index # Attach the local index for easier calculations later
         sel_muon = Muons.p > 2.0
-        selected_muons = ak.mask(Muons, sel_muon)
+        selected_muons_p = Muons[sel_muon]
 
         # Select events with at least 4 muons
-        at_least_4_muons = ak.num(ak.drop_none(selected_muons), axis=1) > 3
-        events_with_at_least_4_muons = ak.mask(events.ReconstructedParticles, at_least_4_muons)
-
-        selected_muons = ak.mask(selected_muons, at_least_4_muons)
+        at_least_4_muons = ak.num(selected_muons_p, axis=1) > 3
+        selected_muons = selected_muons_p[at_least_4_muons]
 
         # Build Z resonances
-        Z, l1, l2 = functions.resonanceBuilder_mass(resonance_mass=91.2, use_MC_Kinematics=False, leptons=selected_muons)
+        Z = resonanceBuilder_mass(resonance_mass=91.2, use_MC_Kinematics=False, leptons=selected_muons)
 
         # On Shell Z
         zll = ak.firsts(Z)
-        l1 = ak.firsts(l1)
-        l2 = ak.firsts(l2)
 
         # Remove the used up muons from the muon list
-        on_shell_z_l1 = l1[:, np.newaxis]
-        on_shell_z_l2 = l2[:, np.newaxis]
-        l1_removed = selected_muons.index != on_shell_z_l1.index
-        l2_removed = selected_muons.index != on_shell_z_l2.index
-        rest_of_muons = selected_muons[l1_removed & l2_removed]
+        mask = create_mask(zll.l1_index, zll.l2_index, selected_muons.index)
+        rest_of_muons = selected_muons[mask]
 
-        m1, m2 = functions.getTwoHighestPMuons(rest_of_muons)
+        m1, m2, c_mask = getTwoHighestPMuons(rest_of_muons)
 
         non_res_Z = m1 + m2
         # Angle between the two
@@ -84,15 +83,15 @@ class Fourleptons(processor.ProcessorABC):
         # Collect all the four Muons
         fourMuons_collected = ak.concatenate(
             (
-                l1[:, np.newaxis],
-                l2[:, np.newaxis],
-                m1[:, np.newaxis],
-                m2[:, np.newaxis]
+                ak.drop_none(l1[c_mask])[:, np.newaxis],
+                ak.drop_none(l2[c_mask])[:, np.newaxis],
+                ak.drop_none(m1)[:, np.newaxis],
+                ak.drop_none(m2)[:, np.newaxis]
             ),
             axis=1
         )
-        fourMuons_collected = ak.mask(fourMuons_collected, ak.num(fourMuons_collected, axis = 1) > 3)
-        fourMuons = zll + non_res_Z
+        fourMuons_collected = ak.mask(fourMuons_collected, ak.num(fourMuons_collected, axis=1) > 3)
+        fourMuons = ak.mask(zll, c_mask) + non_res_Z
 
         fourMuons_pmin = ak.min(fourMuons_collected.p, axis=1)
 

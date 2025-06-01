@@ -17,8 +17,9 @@ def resonanceBuilder_mass(resonance_mass=None, use_MC_Kinematics=False, leptons=
     lep1 , lep2 = ak.unzip(combs)
     di_lep = lep1 + lep2 # This process drops any other field except 4 momentum fields
 
-    # di_lep = ak.zip({"px":di_lep.px,"py":di_lep.py,"pz":di_lep.pz,"E":di_lep.E,"charge":lep1.charge + lep2.charge}, with_name="Momentum4D")
     di_lep["charge"] =  lep1.charge + lep2.charge
+    di_lep["l1_index"] = lep1.index
+    di_lep["l2_index"] = lep2.index
 
     # Choose oppositely charged leptons
     di_lep = di_lep[di_lep.charge == 0]
@@ -26,15 +27,8 @@ def resonanceBuilder_mass(resonance_mass=None, use_MC_Kinematics=False, leptons=
     # Sort by closest mass to the resonance value
     sort_mask = ak.argsort(abs(resonance_mass-di_lep.mass), axis=1)
     Reso = di_lep[sort_mask]
-    used_lep1 = lep1[sort_mask]
-    used_lep2 = lep2[sort_mask]
 
-    #Choose the best candidate
-    Reso = ak.fill_none(Reso,[],axis=0) #Transform the None values at axis 0 to []
-    used_lep1 = ak.fill_none(used_lep1, [], axis=0)
-    used_lep2 = ak.fill_none(used_lep2, [], axis=0)
-
-
+    return Reso
     return Reso, used_lep1, used_lep2
 
 # 2. To replace: FCCAnalyses::ZHfunctions::getTwoHighestPMuons(rest_of_muons)") # Find the higest p muon pair from the remaining muons (off-shell Z)
@@ -42,10 +36,10 @@ def getTwoHighestPMuons(muons):
     '''
     Sort by decending P and return the pair of particles with highest P and opposite charges
     '''
-    if not ak.all(ak.num(muons, axis=1) > 1 ):
-        raise IndexError("Need at least two particles!")
-    sorted_muons_pt = ak.argsort(muons.p, ascending=False)
-    sorted_muons = muons[sorted_muons_pt]
+    # if not ak.all(ak.num(muons, axis=1) > 1 ):
+    #     raise IndexError("Need at least two particles!")
+    sorted_muons_p = ak.argsort(muons.p, ascending=False)
+    sorted_muons = muons[sorted_muons_p]
 
     # First particle is always selected, if the second one has the opposite charge, then its accepted otherwise we move on to the third and so on
     # Interestingly, this type of operation is non trivial in an array format
@@ -57,15 +51,13 @@ def getTwoHighestPMuons(muons):
     # All combinations
     all_comb = ak.cartesian([first_muon, other_muons])
     l1, l2 = ak.unzip(all_comb)
-    charge_mask = (l1.charge + l2.charge) == 0
-    opp_comb = all_comb[charge_mask]
-    # obtain the first one from here
-    # but first make sure that at least one element is available
-    masked_opp_comb = ak.mask(all_comb, ak.num(all_comb, axis=1) > 0)
+    charge_mask = l1.charge!= l2.charge
+    l1 = l1[charge_mask]
+    l2 = l2[charge_mask]
 
-
-    best_two_muons = masked_opp_comb[:, 0]
-    return ak.unzip(best_two_muons)
+    at_least_one_opp_charged = ak.sum(charge_mask, axis=1) > 0
+    
+    return ak.firsts(l1), ak.firsts(l2), at_least_one_opp_charged
 # 3. To sum all the lorentz vectors in a an array of lorentzvectors
 def sum_all(array_of_lv):
     array_of_lv = ak.drop_none(array_of_lv)
