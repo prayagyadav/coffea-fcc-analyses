@@ -69,6 +69,8 @@ class Fourleptons(processor.ProcessorABC):
 
         # On Shell Z
         zll = ak.firsts(Z)
+        l1 = ak.firsts(selected_muons[selected_muons.index == zll.l1_index])
+        l2 = ak.firsts(selected_muons[selected_muons.index == zll.l2_index])
 
         # Remove the used up muons from the muon list
         mask = create_mask(zll.l1_index, zll.l2_index, selected_muons.index)
@@ -95,13 +97,15 @@ class Fourleptons(processor.ProcessorABC):
 
         fourMuons_pmin = ak.min(fourMuons_collected.p, axis=1)
 
-        # rest_of_particles = remove(events_with_at_least_4_muons, fourMuons_collected)
-        rest_of_particles = remove(events.ReconstructedParticles, fourMuons_collected)
+        chosen_reco_4_mu = events.ReconstructedParticles[at_least_4_muons]
+        chosen_reco = chosen_reco_4_mu[c_mask]
+        
+        rest_of_particles = remove(chosen_reco, fourMuons_collected)
         all_others = functions.sum_all(rest_of_particles)
-
-        Emiss = recoilBuilder(functions.sum_all(events.ReconstructedParticles), ecm=config.ecm)
+        
+        Emiss = recoilBuilder(functions.sum_all(chosen_reco), ecm=config.ecm)
         pmiss = Emiss.E
-
+        
         # Cone Isolation
         fourMuons_iso = functions.coneIsolation(fourMuons_collected, rest_of_particles, min_dr=0.0, max_dr=0.523599)
         fourMuons_min_iso = ak.max(fourMuons_iso, axis=1)
