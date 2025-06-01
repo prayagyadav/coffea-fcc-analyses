@@ -29,7 +29,7 @@ process = {
         'wzp6_ee_mumuH_HZa_ecm240',
         ]
 }
-reduction_factor = 0.001
+reduction_factor = 0.1
 fraction = {
         # Signal
         'wzp6_ee_qqH_HZZ_llll_ecm240':1*reduction_factor,
@@ -141,6 +141,7 @@ yield_table_scale = 0.7 # reduce font sizes in yield table by this factor, so th
 legend_location = (0.64, 0.64) # Coordinate of the bottom left corner of the legend wrt to the plot area
 FCC_text_location = (0.30,1.02) # Coordinate of the bottom left corner of the FCC text wrt to the plot area
 custom_mc_order = ['ZZ', 'Zqq', 'mumuH_Hjj', 'WW', 'HWW', 'mumuH_HZa'] # From top to bottom
+#custom_mc_order = ['ZZ'] # Delete me
 # custom_mc_order = ['mumuH_HZa', 'HWW', 'WW', 'mumuH_Hjj', 'Zqq', 'ZZ']
 # custom_mc_order = custom_mc_ordera[::-1]
 Reverse_legend_labels = False # Reverse legend order without changing the stack order
