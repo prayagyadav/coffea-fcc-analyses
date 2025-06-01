@@ -60,7 +60,7 @@ def getTwoHighestPMuons(muons):
     return ak.firsts(l1), ak.firsts(l2), at_least_one_opp_charged
 # 3. To sum all the lorentz vectors in a an array of lorentzvectors
 def sum_all(array_of_lv):
-    array_of_lv = ak.drop_none(array_of_lv)
+    #array_of_lv = ak.drop_none(array_of_lv)
 
     out = ak.zip(
         {

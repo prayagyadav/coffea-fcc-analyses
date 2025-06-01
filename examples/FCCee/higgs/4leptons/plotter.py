@@ -223,6 +223,7 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
                 unscaled_hists = []
                 for i in datasets:
                     cutflow_hist = input_dict[i]['cutflow'][sel]['Cutflow']
+                    cut_labels = input_dict[i]['cutflow'][sel]['Labels']
                     cutflow_values = cutflow_hist.values()
                     Raw_Events = cutflow_values[0]
                     print(f'-->RawEvents for {i}: {Raw_Events}')
@@ -296,7 +297,6 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
 
                     order = getattr(config, "custom_mc_order", None)
                     if not order is None:
-                        print("Triggered: Reverse histograms")
                         ordered_hist, ordered_label_list, ordered_color_list = hist_sorter(order, hist, label_list, color_list)
                     else:
                         ordered_hist, ordered_label_list, ordered_color_list = hist, label_list, color_list
@@ -322,20 +322,24 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
                         xticks=8
                     )
                     #Signal
-                    if stack_mode and n_bkgs != 0:
+                    if stack_mode and n_bkgs != 0 and n_sig != 0:
                         sigl_hist = [h+sum(hist) for h in hist_signal] #Manual stacking because independent stacking is not supported in mplhep
-                    else :
+                    elif n_sig != 0 :
                         sigl_hist = hist_signal
+                    else:
+                        stop_plotting_signal = True
 
-                    hep.histplot(
-                        sigl_hist,
-                        color=color_list_signal,
-                        label=label_list_signal,
-                        histtype='step',
-                        stack=False, #overridden by stack_mode bool
-                        linewidth=1,
-                        ax=ax
-                    )
+                    if not stop_plotting_signal:
+
+                        hep.histplot(
+                            sigl_hist,
+                            color=color_list_signal,
+                            label=label_list_signal,
+                            histtype='step',
+                            stack=False, #overridden by stack_mode bool
+                            linewidth=1,
+                            ax=ax
+                        )
                     fig.legend(prop={"size":10},loc= getattr(config, "legend_location", (0.74,0.74)), reverse=getattr(config, "Reverse_legend_labels", False) )
 
                     if log_mode :

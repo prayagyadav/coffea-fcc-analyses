@@ -58,17 +58,19 @@ class Fourleptons(processor.ProcessorABC):
         Muons = events.ReconstructedParticles[events.Muonidx0.index]
         Muons["index"] = events.Muonidx0.index # Attach the local index for easier calculations later
         sel_muon = Muons.p > 2.0
-        selected_muons_p = Muons[sel_muon]
+        selected_muons_p = ak.mask(Muons, sel_muon)
 
         # Select events with at least 4 muons
-        at_least_4_muons = ak.num(selected_muons_p, axis=1) > 3
-        selected_muons = selected_muons_p[at_least_4_muons]
+        at_least_4_muons = ak.num(ak.drop_none(selected_muons_p), axis=1) > 3
+        selected_muons = ak.mask(selected_muons_p, at_least_4_muons)
 
         # Build Z resonances
         Z = resonanceBuilder_mass(resonance_mass=91.2, use_MC_Kinematics=False, leptons=selected_muons)
 
         # On Shell Z
         zll = ak.firsts(Z)
+        l1 = ak.firsts(selected_muons[selected_muons.index == zll.l1_index])
+        l2 = ak.firsts(selected_muons[selected_muons.index == zll.l2_index])
 
         # Remove the used up muons from the muon list
         mask = create_mask(zll.l1_index, zll.l2_index, selected_muons.index)
@@ -83,28 +85,36 @@ class Fourleptons(processor.ProcessorABC):
         # Collect all the four Muons
         fourMuons_collected = ak.concatenate(
             (
-                ak.drop_none(l1[c_mask])[:, np.newaxis],
-                ak.drop_none(l2[c_mask])[:, np.newaxis],
-                ak.drop_none(m1)[:, np.newaxis],
-                ak.drop_none(m2)[:, np.newaxis]
+                ak.mask(l1,c_mask)[:, np.newaxis],
+                ak.mask(l2,c_mask)[:, np.newaxis],
+                m1[:, np.newaxis],
+                m2[:, np.newaxis]
             ),
             axis=1
         )
         fourMuons_collected = ak.mask(fourMuons_collected, ak.num(fourMuons_collected, axis=1) > 3)
         fourMuons = ak.mask(zll, c_mask) + non_res_Z
-
+        
         fourMuons_pmin = ak.min(fourMuons_collected.p, axis=1)
+        #print('fourMuons_pmin: ', fourMuons_pmin.head())
 
-        # rest_of_particles = remove(events_with_at_least_4_muons, fourMuons_collected)
-        rest_of_particles = remove(events.ReconstructedParticles, fourMuons_collected)
+        chosen_reco_4_mu = ak.mask(events.ReconstructedParticles, at_least_4_muons)
+        chosen_reco = ak.mask(chosen_reco_4_mu,c_mask)
+        #print('chosen_reco: ', chosen_reco.head() )
+
+        rest_of_particles = remove(chosen_reco, fourMuons_collected)
         all_others = functions.sum_all(rest_of_particles)
+        #print('all_others: ', all_others.head())
 
-        Emiss = recoilBuilder(functions.sum_all(events.ReconstructedParticles), ecm=config.ecm)
+        Emiss = recoilBuilder(functions.sum_all(chosen_reco), ecm=config.ecm)
         pmiss = Emiss.E
+        #print('pmiss: ', pmiss.head())
 
         # Cone Isolation
         fourMuons_iso = functions.coneIsolation(fourMuons_collected, rest_of_particles, min_dr=0.0, max_dr=0.523599)
+        #print('fourMuons_iso: ', fourMuons_iso.head())
         fourMuons_min_iso = ak.max(fourMuons_iso, axis=1)
+        #print('fourMuons_min_iso: ', fourMuons_min_iso.head())
 
         #Placeholder
         E = events.ReconstructedParticles.E
