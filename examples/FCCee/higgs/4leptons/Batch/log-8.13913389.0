@@ -1,2 +1,41 @@
 000 (13913389.000.000) 06/02 01:37:48 Job submitted from host: <137.138.120.116:9618?addrs=137.138.120.116-9618+[2001-1458-d00-16--17b]-9618&alias=bigbird12.cern.ch&noUDP&sock=schedd_9562_50ad>
 ...
+040 (13913389.000.000) 06/02 01:40:19 Started transferring input files
+	Transferring to host: <128.142.137.215:9618?addrs=128.142.137.215-9618+[2001-1458-301-5e--100-cb]-9618&alias=b9g19p7030.cern.ch&noUDP&sock=slot1_5_863089_0772_17589>
+...
+040 (13913389.000.000) 06/02 01:40:19 Finished transferring input files
+...
+001 (13913389.000.000) 06/02 01:40:19 Job executing on host: <128.142.137.215:9618?addrs=128.142.137.215-9618+[2001-1458-301-5e--100-cb]-9618&alias=b9g19p7030.cern.ch&noUDP&sock=startd_2430_5b3a>
+	SlotName: slot1_5@b9g19p7030.cern.ch
+	CondorScratchDir = "/pool/condor/dir_2171258"
+	Cpus = 1
+	Disk = 2629
+	GPUs = 0
+	Memory = 3000
+...
+006 (13913389.000.000) 06/02 01:40:33 Image size of job updated: 16392
+	17  -  MemoryUsage of job (MB)
+	16392  -  ResidentSetSize of job (KB)
+...
+006 (13913389.000.000) 06/02 01:44:18 Image size of job updated: 53721448
+	17  -  MemoryUsage of job (MB)
+	16404  -  ResidentSetSize of job (KB)
+...
+040 (13913389.000.000) 06/02 01:44:19 Started transferring output files
+...
+040 (13913389.000.000) 06/02 01:44:19 Finished transferring output files
+...
+007 (13913389.000.000) 06/02 01:44:19 Shadow exception!
+	Error from slot1_5@b9g19p7030.cern.ch: STARTER at 128.142.137.215 failed to send file(s) to <137.138.120.116:9618>: |Error: reading from file /pool/condor/dir_2171258/4leptons-chunk8.coffea: (errno 2) No such file or directory; SHADOW failed to receive file(s) from <128.142.137.215:37725>
+	7782  -  Run Bytes Sent By Job
+	571950  -  Run Bytes Received By Job
+...
+012 (13913389.000.000) 06/02 01:44:19 Job was held.
+	Transfer output files failure at execution point slot1_5@b9g19p7030.cern.ch while sending files to access point bigbird12. Details: reading from file /pool/condor/dir_2171258/4leptons-chunk8.coffea: (errno 2) No such file or directory
+	Code 12 Subcode 2
+...
+009 (13913389.000.000) 06/02 11:48:41 Job was aborted.
+	via condor_rm (by user pryadav)
+
+	Job terminated by itself at 2025-06-01T23:44:18Z (using method 0: OF_ITS_OWN_ACCORD).
+...

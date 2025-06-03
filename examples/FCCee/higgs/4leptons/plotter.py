@@ -322,6 +322,7 @@ def generate_plots(input_dict, req_hists, req_plots, selections, stack, log, for
                         xticks=8
                     )
                     #Signal
+                    stop_plotting_signal = False
                     if stack_mode and n_bkgs != 0 and n_sig != 0:
                         sigl_hist = [h+sum(hist) for h in hist_signal] #Manual stacking because independent stacking is not supported in mplhep
                     elif n_sig != 0 :
