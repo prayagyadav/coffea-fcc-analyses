@@ -55,7 +55,7 @@ def getTwoHighestPMuons(muons):
     l1 = l1[charge_mask]
     l2 = l2[charge_mask]
 
-    at_least_one_opp_charged = ak.sum(charge_mask, axis=1) > 0
+    at_least_one_opp_charged = ak.sum(charge_mask, axis=1) > 0 # is an event selection
     
     return ak.firsts(l1), ak.firsts(l2), at_least_one_opp_charged
 # 3. To sum all the lorentz vectors in a an array of lorentzvectors
