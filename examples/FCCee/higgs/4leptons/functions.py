@@ -88,8 +88,8 @@ def coneIsolation(particle, rest_of_the_particles, min_dr=0.0 , max_dr=0.4):
     n_angle = n1.deltaangle(n2)
     c_angle = c1.deltaangle(c2)
 
-    n_angle_mask = (n_angle < max_dr) & (n_angle > min_dr)
-    c_angle_mask = (c_angle < max_dr) & (c_angle > min_dr)
+    n_angle_mask = (n_angle < max_dr) & (n_angle >= min_dr)
+    c_angle_mask = (c_angle < max_dr) & (c_angle >= min_dr)
 
     filtered_neutral = n2[n_angle_mask]
     filtered_charged = c2[c_angle_mask]
@@ -97,7 +97,7 @@ def coneIsolation(particle, rest_of_the_particles, min_dr=0.0 , max_dr=0.4):
     sumNeutral = ak.sum(filtered_neutral.p, axis=2)
     sumCharged = ak.sum(filtered_charged.p, axis=2)
 
-    total_sum = sumNeutral + sumNeutral
+    total_sum = sumNeutral + sumCharged
 
     ratio = total_sum / particle.p
 

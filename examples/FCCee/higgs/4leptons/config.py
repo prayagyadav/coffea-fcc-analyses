@@ -29,7 +29,7 @@ process = {
         'wzp6_ee_mumuH_HZa_ecm240',
         ]
 }
-reduction_factor = 0.1
+reduction_factor = 1
 fraction = {
         # Signal
         'wzp6_ee_qqH_HZZ_llll_ecm240':1*reduction_factor,
@@ -52,8 +52,8 @@ local_yaml_dict = "../../filesets/"
 #output_path = "outputs"
 output_path = "Batch"
 output_filename = "4leptons"
-executor = "dask" # 'dask' is local and 'condor' is batch
-#executor = "condor"
+#executor = "dask" # 'dask' is local and 'condor' is batch
+executor = "condor"
 job_flavor = "longlunch" # 'job flavor' in case condor is used
 transfer_these_extra_files=["functions.py"]
 
