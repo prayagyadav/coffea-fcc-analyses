@@ -74,7 +74,9 @@ def get_xsec_scale(dataset, raw_events, Luminosity):
         sf = (xsec*Luminosity)/raw_events
     else :
         raise ValueError('Raw events less than of equal to zero!')
-    return round(float(sf),3)
+    #return round(float(sf),3)
+    return float(sf)
+
 
 def hist_sorter(preferred_order, unsorted_hists, unsorted_labels, unsorted_colors):
     '''Custom histogram sorter to plot in histplot'''

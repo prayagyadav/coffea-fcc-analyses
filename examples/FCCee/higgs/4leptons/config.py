@@ -113,7 +113,7 @@ req_hists = {
 }
 cross_sections = {#in pb # Taken as is from FCC events catalogue at https://fcc-physics-events.web.cern.ch/FCCee/winter2023/Delphesevents_IDEA.php
                   # Signal
-                  'wzp6_ee_qqH_HZZ_llll_ecm240':3.777e-5,
+                  'wzp6_ee_qqH_HZZ_llll_ecm240':0.00003777,
                   'wzp6_ee_nunuH_HZZ_ecm240':0.00122,
                   # Backgrounds
                   'p8_ee_Zqq_ecm240':52.6539,
@@ -126,7 +126,7 @@ cross_sections = {#in pb # Taken as is from FCC events catalogue at https://fcc-
                   'wzp6_ee_mumuH_Hcc_ecm240':0.0001956,
                   'wzp6_ee_mumuH_Hbb_ecm240':0.00394,
                   'wzp6_ee_mumuH_Hgg_ecm240':0.0005538,
-                  'wzp6_ee_mumuH_HZa_ecm240':1.037e-5,
+                  'wzp6_ee_mumuH_HZa_ecm240':0.00001037,
                   }
 input_path     = output_path
 plot_path      = 'outputs/plots/'
@@ -140,7 +140,7 @@ collider       = 'FCC-ee'
 yield_table_scale = 0.7 # reduce font sizes in yield table by this factor, so that they fit in the figure area
 legend_location = (0.64, 0.64) # Coordinate of the bottom left corner of the legend wrt to the plot area
 FCC_text_location = (0.30,1.02) # Coordinate of the bottom left corner of the FCC text wrt to the plot area
-custom_mc_order = ['ZZ', 'Zqq', 'mumuH_Hjj', 'WW', 'HWW', 'mumuH_HZa'] # From top to bottom
+custom_mc_order = ['ZZ', 'Zqq', 'WW', 'mumuH_Hjj', 'HWW', 'mumuH_HZa'] # From top to bottom
 #custom_mc_order = ['ZZ'] # Delete me
 # custom_mc_order = ['mumuH_HZa', 'HWW', 'WW', 'mumuH_Hjj', 'Zqq', 'ZZ']
 # custom_mc_order = custom_mc_ordera[::-1]

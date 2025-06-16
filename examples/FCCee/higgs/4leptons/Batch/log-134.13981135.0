@@ -1,0 +1,49 @@
+000 (13981135.000.000) 06/16 15:37:19 Job submitted from host: <137.138.120.116:9618?addrs=137.138.120.116-9618+[2001-1458-d00-16--17b]-9618&alias=bigbird12.cern.ch&noUDP&sock=schedd_9562_50ad>
+...
+040 (13981135.000.000) 06/16 15:47:01 Started transferring input files
+	Transferring to host: <128.142.192.180:9618?addrs=128.142.192.180-9618+[2001-1458-301-56--100-30]-9618&alias=b9g18p8490.cern.ch&noUDP&sock=slot1_2_1638433_049b_38706>
+...
+040 (13981135.000.000) 06/16 15:47:01 Finished transferring input files
+...
+001 (13981135.000.000) 06/16 15:47:01 Job executing on host: <128.142.192.180:9618?addrs=128.142.192.180-9618+[2001-1458-301-56--100-30]-9618&alias=b9g18p8490.cern.ch&noUDP&sock=startd_5888_41b9>
+	SlotName: slot1_2@b9g18p8490.cern.ch
+	CondorScratchDir = "/pool/condor/dir_2747383"
+	Cpus = 1
+	Disk = 3690
+	GPUs = 0
+	Memory = 3000
+...
+006 (13981135.000.000) 06/16 15:47:10 Image size of job updated: 14964
+	15  -  MemoryUsage of job (MB)
+	14964  -  ResidentSetSize of job (KB)
+...
+006 (13981135.000.000) 06/16 15:52:11 Image size of job updated: 307384
+	301  -  MemoryUsage of job (MB)
+	307384  -  ResidentSetSize of job (KB)
+...
+006 (13981135.000.000) 06/16 15:57:12 Image size of job updated: 3978172
+	3885  -  MemoryUsage of job (MB)
+	3978172  -  ResidentSetSize of job (KB)
+...
+006 (13981135.000.000) 06/16 16:00:15 Image size of job updated: 3978172
+	3886  -  MemoryUsage of job (MB)
+	3978416  -  ResidentSetSize of job (KB)
+...
+040 (13981135.000.000) 06/16 16:00:15 Started transferring output files
+...
+040 (13981135.000.000) 06/16 16:00:15 Finished transferring output files
+...
+007 (13981135.000.000) 06/16 16:00:15 Shadow exception!
+	Error from slot1_2@b9g18p8490.cern.ch: STARTER at 128.142.192.180 failed to send file(s) to <137.138.120.116:9618>: |Error: reading from file /pool/condor/dir_2747383/4leptons-chunk134.coffea: (errno 2) No such file or directory; SHADOW failed to receive file(s) from <128.142.192.180:44079>
+	7794  -  Run Bytes Sent By Job
+	565705  -  Run Bytes Received By Job
+...
+012 (13981135.000.000) 06/16 16:00:15 Job was held.
+	Transfer output files failure at execution point slot1_2@b9g18p8490.cern.ch while sending files to access point bigbird12. Details: reading from file /pool/condor/dir_2747383/4leptons-chunk134.coffea: (errno 2) No such file or directory
+	Code 12 Subcode 2
+...
+009 (13981135.000.000) 06/16 16:14:13 Job was aborted.
+	via condor_rm (by user pryadav)
+
+	Job terminated by itself at 2025-06-16T14:00:15Z (using method 0: OF_ITS_OWN_ACCORD).
+...

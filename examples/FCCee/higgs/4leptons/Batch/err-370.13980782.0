@@ -1,0 +1,25 @@
+/usr/local/lib/python3.12/site-packages/coffea/nanoevents/schemas/fcc.py:5: FutureWarning: In version 2025.1.0 (target date: 2024-12-31 11:59:59-06:00), this will be an error.
+To raise these warnings as errors (and get stack traces to find out where they're called), run
+    import warnings
+    warnings.filterwarnings("error", module="coffea.*")
+after the first `import coffea` or use `@pytest.mark.filterwarnings("error:::coffea.*")` in pytest.
+Issue: coffea.nanoevents.methods.vector will be removed and replaced with scikit-hep vector. Nanoevents schemas internal to coffea will be migrated. Otherwise please consider using that package!.
+  from coffea.nanoevents.methods import vector
+/usr/local/lib/python3.12/site-packages/coffea/util.py:226: UserWarning: Skipping _intMap as it is not interpretable by Uproot
+  warnings.warn(
+/usr/local/lib/python3.12/site-packages/coffea/util.py:234: UserWarning: Skipping _intMap.first as it is not interpretable by Uproot
+  warnings.warn(
+/usr/local/lib/python3.12/site-packages/coffea/util.py:234: UserWarning: Skipping _intMap.second as it is not interpretable by Uproot
+  warnings.warn(
+/usr/local/lib/python3.12/site-packages/coffea/util.py:226: UserWarning: Skipping _floatMap as it is not interpretable by Uproot
+  warnings.warn(
+/usr/local/lib/python3.12/site-packages/coffea/util.py:234: UserWarning: Skipping _floatMap.first as it is not interpretable by Uproot
+  warnings.warn(
+/usr/local/lib/python3.12/site-packages/coffea/util.py:234: UserWarning: Skipping _floatMap.second as it is not interpretable by Uproot
+  warnings.warn(
+/usr/local/lib/python3.12/site-packages/coffea/util.py:226: UserWarning: Skipping _stringMap as it is not interpretable by Uproot
+  warnings.warn(
+/usr/local/lib/python3.12/site-packages/coffea/util.py:234: UserWarning: Skipping _stringMap.first as it is not interpretable by Uproot
+  warnings.warn(
+/usr/local/lib/python3.12/site-packages/coffea/util.py:234: UserWarning: Skipping _stringMap.second as it is not interpretable by Uproot
+  warnings.warn(
