@@ -7,3 +7,4 @@ src/__pycache__/
 src/.ipynb_checkpoints/
 development/.ipynb_checkpoints/
 notebooks/eos/
+examples/FCCee/higgs/4leptons/FCCAnalyses_output/
