@@ -121,24 +121,24 @@ class Fourleptons(processor.ProcessorABC):
 
         # Define individual cuts
         cut.add('No cut', ak.all(E > 0, axis=1))
-        cut.add('cut1', ak.all(E > 0, axis=1))
-        cut.add('cut2', ak.all(E > 0, axis=1))
-        cut.add('cut3', ak.all(E > 0, axis=1))
-        cut.add('cut4', ak.all(E > 0, axis=1))
-        cut.add('cut5', ak.all(E > 0, axis=1))
-        cut.add('cut6', ak.all(E > 0, axis=1))
+        cut.add('cut1', fourMuons_pmin > 5)
+        cut.add('cut2', pmiss < 20)
+        cut.add('cut3', all_others.E > 95)
+        cut.add('cut4', (non_res_Z.m < 65) && (non_res_Z.m > 10))
+        cut.add('cut5', (fourMuons.m < 130) && (fourMuons.m > 120))
+        cut.add('cut6', (fourMuons.m < 125.5) && (fourMuons.m > 124))
         cut.add('at_least_4_muons', at_least_4_muons)
 
 
         # Selections: A collection of cuts (event selections)
         sel = {}
         sel[0] = ['No cut']
-        sel[1] = ['No cut','cut1']
-        sel[2] = ['No cut','cut1','cut2']
-        sel[3] = ['No cut','cut1','cut2','cut3']
-        sel[4] = ['No cut','cut1','cut2','cut3','cut4']
-        sel[5] = ['No cut','cut1','cut2','cut3','cut4','cut5']
-        sel[6] = ['No cut','cut1','cut2','cut3','cut4','cut5','cut6']
+        sel[1] = ['cut1']
+        sel[2] = ['cut1','cut2']
+        sel[3] = ['cut1','cut2','cut3']
+        sel[4] = ['cut1','cut2','cut3','cut4']
+        sel[5] = ['cut1','cut2','cut3','cut4','cut5']
+        sel[6] = ['cut6']
 
         # Get cutflow hists
         sel_ocl = {key:cut.cutflow(*val).yieldhist() for key,val in sel.items()}
@@ -147,15 +147,15 @@ class Fourleptons(processor.ProcessorABC):
         vars_sel = {}
         for key,selections in sel.items():
             vars_sel[key] = {
-                'selectedmuons_p':selected_muons.p[cut.all(*selections)],
+                'selectedmuons_p':selected_muons[c_mask].p[cut.all(*selections)],
                 'fourmuons_mass':fourMuons.m[cut.all(*selections)],
                 'fourmuons_pmin':fourMuons_pmin[cut.all(*selections)],
-                'Z_res_mass':zll.m[cut.all(*selections)],
+                'Z_res_mass':zll[c_mask].m[cut.all(*selections)],
                 'Z_non_res_mass':non_res_Z.m[cut.all(*selections)],
                 'vis_e_woMuons':all_others.E[cut.all(*selections)],
                 'iso_least_isolated_muon':fourMuons_min_iso[cut.all(*selections)],
                 'missing_p':pmiss[cut.all(*selections)],
-                'cos_theta_miss':Emiss.theta[cut.all(*selections)],
+                'cos_theta_miss':abs(np.cos(Emiss.theta)[cut.all(*selections)],
             }
 
 
