@@ -3,7 +3,8 @@
 
 # Load FCCAnalyses output : stage_1 sel_0
 
-fcc_base_directory = "with_filter"
+fcc_base_directory = "FCCAnalyses_output"
+#fcc_base_directory = "with_filter"
 coffeafccanalyses_input_directory = "Batch"
 output_filename = "4leptons" #for coffea
 
@@ -148,7 +149,7 @@ datasets = glob.glob(fcc_base_directory+"/*")
 FCC_output = {}
 for path in datasets:
     dataset_name = path.split('/')[-1]
-    with uproot.open(path+"/chunk0.root") as f:
+    with uproot.open(path+"/chunk_0.root") as f:
         FCC_output[dataset_name] = f['events'].arrays()
 
 fcc_hists = {}

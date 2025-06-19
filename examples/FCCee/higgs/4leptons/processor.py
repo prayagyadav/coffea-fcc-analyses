@@ -116,17 +116,18 @@ class Fourleptons(processor.ProcessorABC):
         fourMuons_min_iso = ak.max(fourMuons_iso, axis=1)
         #print('fourMuons_min_iso: ', fourMuons_min_iso.head())
 
-        #Placeholder
         E = events.ReconstructedParticles.E
+        selected_muons = ak.mask(selected_muons, c_mask)
+        zll = ak.mask(zll, c_mask)
 
         # Define individual cuts
         cut.add('No cut', ak.all(E > 0, axis=1))
         cut.add('cut1', fourMuons_pmin > 5)
         cut.add('cut2', pmiss < 20)
         cut.add('cut3', all_others.E > 95)
-        cut.add('cut4', (non_res_Z.m < 65) && (non_res_Z.m > 10))
-        cut.add('cut5', (fourMuons.m < 130) && (fourMuons.m > 120))
-        cut.add('cut6', (fourMuons.m < 125.5) && (fourMuons.m > 124))
+        cut.add('cut4', (non_res_Z.m < 65) & (non_res_Z.m > 10))
+        cut.add('cut5', (fourMuons.m < 130) & (fourMuons.m > 120))
+        cut.add('cut6', (fourMuons.m < 125.5) & (fourMuons.m > 124))
         cut.add('at_least_4_muons', at_least_4_muons)
 
 
@@ -147,15 +148,15 @@ class Fourleptons(processor.ProcessorABC):
         vars_sel = {}
         for key,selections in sel.items():
             vars_sel[key] = {
-                'selectedmuons_p':selected_muons[c_mask].p[cut.all(*selections)],
+                'selectedmuons_p':selected_muons.p[cut.all(*selections)],
                 'fourmuons_mass':fourMuons.m[cut.all(*selections)],
                 'fourmuons_pmin':fourMuons_pmin[cut.all(*selections)],
-                'Z_res_mass':zll[c_mask].m[cut.all(*selections)],
+                'Z_res_mass':zll.m[cut.all(*selections)],
                 'Z_non_res_mass':non_res_Z.m[cut.all(*selections)],
                 'vis_e_woMuons':all_others.E[cut.all(*selections)],
                 'iso_least_isolated_muon':fourMuons_min_iso[cut.all(*selections)],
                 'missing_p':pmiss[cut.all(*selections)],
-                'cos_theta_miss':abs(np.cos(Emiss.theta)[cut.all(*selections)],
+                'cos_theta_miss':abs(np.cos(Emiss.theta))[cut.all(*selections)],
             }
 
 
