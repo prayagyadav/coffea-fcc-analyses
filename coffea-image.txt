@@ -1,1 +1,1 @@
-coffeateam/coffea-dask-almalinux8:2025.1.0-py3.12
+coffeateam/coffea-dask-almalinux9:2025.5.0.rc2-py3.12

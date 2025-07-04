@@ -58,7 +58,7 @@ job_flavor = "longlunch" # 'job flavor' in case condor is used
 transfer_these_extra_files=["functions.py"]
 
 use_schema = "FCC"
-schema_version = "latest"
+schema_version = "pre-edm4hep1"
 
 ###################
 # Plot properties #

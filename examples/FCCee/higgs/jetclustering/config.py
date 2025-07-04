@@ -21,7 +21,7 @@ output_filename = "jetclustering"
 executor = "dask"
 #executor = "condor" # 'dask' is local and 'condor' is batch
 use_schema = "FCC"
-schema_version = "latest"
+schema_version = "pre-edm4hep1"
 
 ###################
 # Plot properties #
