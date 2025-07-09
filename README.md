@@ -44,6 +44,38 @@ If using a singularity container on lxplus (Recommended), run the installation s
 ```
 
 ---
+
+## Start a new project
+
+1. Create a new project from templates (lets call the project 'test')
+
+```bash
+    coffea-fcc-analyses init test
+```
+
+2. A new folder named 'test' is created
+
+```bash
+    ls test
+```
+```bash
+      config.py  plotter.py  processor.py  runner.py
+```
+3. Modify the config and processor as per your needs. plotter and runner could be kept as they are. To run the analysis with dask:
+```bash
+    ./shell
+    shell> python runner.py -e dask
+```
+or condor with
+```bash
+    shell> python runner.py -e condor
+```
+4. Make plots with plotter:
+```bash
+    shell> python plotter.py
+```
+
+
 ## Examples
 
 1. Find out working examples in the `examples` directory
